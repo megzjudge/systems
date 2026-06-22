@@ -22,16 +22,6 @@ Demographic averages are pre-captured from the YourMorals.org API and bundled in
 | `index.html` | About the empathizing–systemizing framework and links to the survey |
 | `results.html` | Score entry, chart, demographic filters, and combo explorer |
 
-## Local development
-
-Static site — serve the folder with any HTTP server:
-
-```bash
-python3 -m http.server 8765
-```
-
-Then open [http://localhost:8765/](http://localhost:8765/).
-
 ## Data
 
 - `data.js` — demographic singles, two-filter combinations, and metadata (`DEMOGRAPHIC_COMBOS`, `DEMOGRAPHIC_NO_DATA`, etc.)
