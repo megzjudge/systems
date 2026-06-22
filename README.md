@@ -2,8 +2,6 @@
 
 Interactive visualization of empathizing and systemizing scores, sourced from [YourMorals.org](https://yourmorals.org/).
 
-**Live site:** [systems-feelings-survey.jdge.cc](https://systems-feelings-survey.jdge.cc/)
-
 ## What it does
 
 The site links to the official [Systems & Feelings survey](https://yourmorals.org/) on YourMorals.org and provides a results page where you can:
