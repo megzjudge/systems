@@ -1,21 +1,38 @@
 let chart = null;
-let userResults = loadResults();
+let visitorResults = loadVisitorResults();
 const selectedDemographics = new Set();
 
-function getVisibleDemographics() {
-  const myResult = {
-    ...DEMOGRAPHICS.find((d) => d.id === 'my-result'),
-    systemizing: userResults.systemizing,
-    empathy: userResults.empathy,
-  };
+function getPersonalBars() {
+  const bars = [];
 
-  const checked = DEMOGRAPHICS.filter((d) => !d.alwaysShow && selectedDemographics.has(d.id));
-
-  if (checked.length === 0) {
-    return [myResult, ...DEMOGRAPHICS.filter((d) => !d.alwaysShow)];
+  if (visitorResults) {
+    bars.push({
+      label: 'Your Result',
+      systemizing: visitorResults.systemizing,
+      empathy: visitorResults.empathy,
+      color: YOUR_RESULT_COLOR,
+    });
   }
 
-  return [myResult, ...checked];
+  bars.push({
+    label: MY_RESULT.label,
+    systemizing: MY_RESULT.systemizing,
+    empathy: MY_RESULT.empathy,
+    color: MY_RESULT.color,
+  });
+
+  return bars;
+}
+
+function getVisibleDemographics() {
+  const personal = getPersonalBars();
+  const checked = DEMOGRAPHICS.filter((d) => selectedDemographics.has(d.id));
+
+  if (checked.length === 0) {
+    return [...personal, ...DEMOGRAPHICS];
+  }
+
+  return [...personal, ...checked];
 }
 
 function buildChartData(groups) {
@@ -91,10 +108,26 @@ function renderChart() {
 }
 
 function updateScoreDisplay() {
-  document.getElementById('score-systemizing').textContent = userResults.systemizing.toFixed(2);
-  document.getElementById('score-empathy').textContent = userResults.empathy.toFixed(2);
-  document.getElementById('input-systemizing').value = userResults.systemizing;
-  document.getElementById('input-empathy').value = userResults.empathy;
+  const visitorSys = document.getElementById('score-visitor-systemizing');
+  const visitorEmp = document.getElementById('score-visitor-empathy');
+  const visitorCard = document.getElementById('visitor-score-card');
+
+  if (visitorResults) {
+    visitorSys.textContent = visitorResults.systemizing.toFixed(2);
+    visitorEmp.textContent = visitorResults.empathy.toFixed(2);
+    visitorCard.classList.add('has-data');
+    document.getElementById('input-systemizing').value = visitorResults.systemizing;
+    document.getElementById('input-empathy').value = visitorResults.empathy;
+  } else {
+    visitorSys.textContent = '—';
+    visitorEmp.textContent = '—';
+    visitorCard.classList.remove('has-data');
+    document.getElementById('input-systemizing').value = '';
+    document.getElementById('input-empathy').value = '';
+  }
+
+  document.getElementById('score-my-systemizing').textContent = MY_RESULT.systemizing.toFixed(2);
+  document.getElementById('score-my-empathy').textContent = MY_RESULT.empathy.toFixed(2);
 }
 
 function renderDemographicFilters() {
@@ -163,11 +196,16 @@ function updateFilteredMessage(override) {
   const avgSys = averageSelected('systemizing');
   const avgEmp = averageSelected('empathy');
 
+  let comparison = `My result: systemizing ${MY_RESULT.systemizing.toFixed(2)}, empathizing ${MY_RESULT.empathy.toFixed(2)}`;
+  if (visitorResults) {
+    comparison = `Your result: systemizing ${visitorResults.systemizing.toFixed(2)}, empathizing ${visitorResults.empathy.toFixed(2)} &nbsp;|&nbsp; ${comparison}`;
+  }
+
   el.innerHTML = `
     <strong>Filtered comparison:</strong> ${labels.join(' + ')}<br>
     Average systemizing: <strong>${avgSys.toFixed(2)}</strong> &nbsp;|&nbsp;
     Average empathizing: <strong>${avgEmp.toFixed(2)}</strong>
-    <br><small>Your scores: systemizing ${userResults.systemizing.toFixed(2)}, empathizing ${userResults.empathy.toFixed(2)}</small>
+    <br><small>${comparison}</small>
   `;
   el.classList.add('visible');
 }
@@ -179,7 +217,7 @@ function averageSelected(field) {
 }
 
 function initResults() {
-  userResults = loadResults();
+  visitorResults = loadVisitorResults();
   updateScoreDisplay();
 
   document.getElementById('score-form').addEventListener('submit', (e) => {
@@ -192,8 +230,16 @@ function initResults() {
       return;
     }
 
-    userResults = { systemizing, empathy };
-    saveResults(systemizing, empathy);
+    visitorResults = { systemizing, empathy };
+    saveVisitorResults(systemizing, empathy);
+    updateScoreDisplay();
+    renderChart();
+    updateFilteredMessage();
+  });
+
+  document.getElementById('clear-results-btn').addEventListener('click', () => {
+    visitorResults = null;
+    clearVisitorResults();
     updateScoreDisplay();
     renderChart();
     updateFilteredMessage();

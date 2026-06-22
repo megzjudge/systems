@@ -1,8 +1,16 @@
 // Illustrative demographic averages — approximated from public YourMorals.org result charts.
 // This site does not host or reproduce the survey itself.
 
+const MY_RESULT = {
+  label: 'My Result',
+  systemizing: 3.3,
+  empathy: 2.95,
+  color: '#8b9a6b',
+};
+
+const YOUR_RESULT_COLOR = '#4a6fa5';
+
 const DEMOGRAPHICS = [
-  { id: 'my-result', label: 'My Result', category: 'personal', color: '#8b9a6b', systemizing: null, empathy: null, alwaysShow: true },
   { id: 'male', label: 'Male', category: 'gender', color: '#7cb87c', systemizing: 2.8, empathy: 2.8 },
   { id: 'female', label: 'Female', category: 'gender', color: '#e8a0b0', systemizing: 2.5, empathy: 3.05 },
   { id: 'liberal', label: 'Liberal', category: 'political', color: '#8ecae6', systemizing: 2.6, empathy: 3.0 },
@@ -33,16 +41,18 @@ const DEMOGRAPHIC_CATEGORIES = [
   { key: 'political', title: 'Political Ideology' },
 ];
 
-const DEFAULT_RESULTS = { systemizing: 3.3, empathy: 2.95 };
-
-function saveResults(systemizing, empathy) {
-  localStorage.setItem('sf-results', JSON.stringify({ systemizing, empathy }));
+function saveVisitorResults(systemizing, empathy) {
+  localStorage.setItem('sf-visitor-results', JSON.stringify({ systemizing, empathy }));
 }
 
-function loadResults() {
+function loadVisitorResults() {
   try {
-    const raw = localStorage.getItem('sf-results');
+    const raw = localStorage.getItem('sf-visitor-results');
     if (raw) return JSON.parse(raw);
   } catch (_) { /* ignore */ }
-  return { ...DEFAULT_RESULTS };
+  return null;
+}
+
+function clearVisitorResults() {
+  localStorage.removeItem('sf-visitor-results');
 }
