@@ -5,8 +5,9 @@ let showPersonalOnly = false;
 let massPreset = null;
 let massPresetBars = null;
 const barColorMap = new Map();
+const demographicColorById = new Map();
 let visitorColor = null;
-let visitorColorIndex = -1;
+let visitorHue = Math.floor(Math.random() * 360);
 
 function hslToHex(h, s, l) {
   s /= 100;
@@ -91,58 +92,72 @@ function pickDistinctColor(usedColors) {
 
 function initBarColors() {
   barColorMap.clear();
+  demographicColorById.clear();
   barColorMap.set(MY_RESULT.label, MY_RESULT.color);
 
-  const labels = new Set([
-    'Your Result',
-    ...DEMOGRAPHICS.map((d) => d.label),
-    ...Object.keys(DEMOGRAPHIC_COMBOS).map(labelForComboKey),
-  ]);
-
-  const shuffled = [...COLOR_POOL];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-
   const used = new Set([MY_RESULT.color]);
+  const hueOffset = Math.random() * 360;
+  const categoryOrder = ['gender', 'age', 'religiosity', 'political', 'education', 'race'];
 
-  labels.forEach((label) => {
-    if (label === MY_RESULT.label) return;
+  categoryOrder.forEach((category, catIdx) => {
+    const items = DEMOGRAPHICS.filter((d) => d.category === category);
+    const hueStep = 360 / Math.max(items.length, 1);
 
-    let color = shuffled.find((c) => c !== MY_RESULT.color && isDistinctEnough(c, used));
-    if (!color) color = pickDistinctColor(used);
+    items.forEach((item, i) => {
+      let hue = (hueOffset + catIdx * 57 + i * hueStep) % 360;
+      const sat = 68 + (i % 2) * 12;
+      const light = 44 + (i % 3) * 11;
+      let color = hslToHex(hue, sat, light);
+      let n = 0;
 
+      while (!isDistinctEnough(color, used, 0.7) && n < 24) {
+        hue = (hue + 23) % 360;
+        color = hslToHex(hue, sat, light);
+        n++;
+      }
+
+      demographicColorById.set(item.id, color);
+      barColorMap.set(item.label, color);
+      used.add(color);
+    });
+  });
+
+  const yourColor = pickDistinctColor(used);
+  barColorMap.set('Your Result', yourColor);
+  used.add(yourColor);
+
+  Object.keys(DEMOGRAPHIC_COMBOS).forEach((key) => {
+    const label = labelForComboKey(key);
+    const color = pickDistinctColor(used);
     barColorMap.set(label, color);
     used.add(color);
   });
 }
 
+function colorForGroup(g) {
+  if (g.label === MY_RESULT.label) return MY_RESULT.color;
+  if (g.label === 'Your Result') return visitorColor || barColorMap.get('Your Result');
+  if (g.id && demographicColorById.has(g.id)) return demographicColorById.get(g.id);
+  return barColorMap.get(g.label) || MY_RESULT.color;
+}
+
 function assignBarColors(groups) {
-  return groups.map((g) => {
-    if (g.label === MY_RESULT.label) {
-      return { ...g, color: MY_RESULT.color };
-    }
-    if (g.label === 'Your Result' && visitorColor) {
-      return { ...g, color: visitorColor };
-    }
-    return { ...g, color: barColorMap.get(g.label) || MY_RESULT.color };
-  });
+  return groups.map((g) => ({ ...g, color: colorForGroup(g) }));
 }
 
 function cycleVisitorColor() {
   if (!visitorResults) return;
   const previous = visitorColor;
   do {
-    visitorColorIndex = (visitorColorIndex + 1) % COLOR_POOL.length;
-    visitorColor = COLOR_POOL[visitorColorIndex];
+    visitorHue = (visitorHue + 37) % 360;
+    visitorColor = hslToHex(visitorHue, 82, 50);
   } while (visitorColor === MY_RESULT.color || visitorColor === previous);
-  renderChart();
+  renderChart(true);
 }
 
 function resetVisitorColor() {
   visitorColor = null;
-  visitorColorIndex = -1;
+  visitorHue = Math.floor(Math.random() * 360);
 }
 
 function clearMassPreset() {
@@ -269,20 +284,26 @@ function buildChartData(groups) {
       data: [g.systemizing, g.empathy],
       backgroundColor: g.color + '99',
       borderColor: g.color,
-      borderWidth: 1.5,
+      borderWidth: g.label === 'Your Result' ? 2.5 : 1.5,
       borderRadius: 2,
     })),
   };
 }
 
-function renderChart() {
+function renderChart(forceRebuild = false) {
   const canvas = document.getElementById('results-chart');
   const groups = getVisibleDemographics();
   const data = buildChartData(groups);
 
+  if (chart && forceRebuild) {
+    chart.destroy();
+    chart = null;
+  }
+
   if (chart) {
-    chart.data = data;
-    chart.update();
+    chart.data.labels = data.labels;
+    chart.data.datasets = data.datasets;
+    chart.update('none');
     return;
   }
 
@@ -636,7 +657,8 @@ function initResults() {
     saveVisitorResults(systemizing, empathy);
     if (!visitorColor) {
       visitorColor = barColorMap.get('Your Result');
-      visitorColorIndex = COLOR_POOL.indexOf(visitorColor);
+      const [h] = hexToHsl(visitorColor);
+      visitorHue = h;
     }
     updateScoreDisplay();
     renderChart();
@@ -664,7 +686,8 @@ function initResults() {
   initBarColors();
   if (visitorResults) {
     visitorColor = barColorMap.get('Your Result');
-    visitorColorIndex = COLOR_POOL.indexOf(visitorColor);
+    const [h] = hexToHsl(visitorColor);
+    visitorHue = h;
   }
   updateScoreDisplay();
   renderChart();
