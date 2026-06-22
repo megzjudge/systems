@@ -249,24 +249,25 @@ function getVisibleDemographics() {
     return [...personal, ...massPresetBars];
   }
 
-  if (selectedCombos.size > 0) {
-    const comboBars = [...selectedCombos]
-      .filter((key) => DEMOGRAPHIC_COMBOS[key])
-      .map((key) => {
-        const combo = DEMOGRAPHIC_COMBOS[key];
-        return {
-          label: labelForComboKey(key),
-          systemizing: combo.systemizing,
-          empathy: combo.empathy,
-        };
+  const selectionBars = [];
+
+  DEMOGRAPHICS.filter((d) => selectedDemographics.has(d.id)).forEach((d) => {
+    selectionBars.push(d);
+  });
+
+  [...selectedCombos]
+    .filter((key) => DEMOGRAPHIC_COMBOS[key])
+    .forEach((key) => {
+      const combo = DEMOGRAPHIC_COMBOS[key];
+      selectionBars.push({
+        label: labelForComboKey(key),
+        systemizing: combo.systemizing,
+        empathy: combo.empathy,
       });
-    return [...personal, ...comboBars];
-  }
+    });
 
-  const checked = DEMOGRAPHICS.filter((d) => selectedDemographics.has(d.id));
-
-  if (checked.length > 0) {
-    return [...personal, ...checked];
+  if (selectionBars.length > 0) {
+    return [...personal, ...selectionBars];
   }
 
   if (showPersonalOnly) {
@@ -442,7 +443,6 @@ function getCombosGroupedByCategory(categoryKey) {
 }
 
 function applyComboSelection(combo) {
-  selectedDemographics.clear();
   showPersonalOnly = false;
   clearMassPreset();
 
@@ -452,9 +452,6 @@ function applyComboSelection(combo) {
     selectedCombos.add(combo.key);
   }
 
-  document.querySelectorAll('.checkbox-list input[type="checkbox"]').forEach((input) => {
-    input.checked = false;
-  });
   document.querySelectorAll('.combo-item-btn').forEach((btn) => {
     btn.classList.toggle('active', selectedCombos.has(btn.dataset.comboKey));
   });
@@ -568,7 +565,6 @@ function renderCategorySection(container, { key, title }) {
       if (e.target.checked) {
         showPersonalOnly = false;
         clearMassPreset();
-        clearComboSelection();
 
         DEMOGRAPHICS.filter((item) => item.category === d.category && item.id !== d.id).forEach((item) => {
           selectedDemographics.delete(item.id);
@@ -586,7 +582,6 @@ function renderCategorySection(container, { key, title }) {
         selectedDemographics.delete(d.id);
       }
       clearMassPreset();
-      clearComboSelection();
       updateFilteredMessage();
       renderChart();
     });
@@ -626,12 +621,22 @@ function updateFilteredMessage(override) {
     return;
   }
 
-  if (selectedCombos.size > 0) {
-    const lines = [...selectedCombos].map((key) => {
+  if (selectedCombos.size > 0 || selectedDemographics.size > 0) {
+    const lines = [];
+
+    [...selectedDemographics].forEach((id) => {
+      const d = DEMOGRAPHICS.find((item) => item.id === id);
+      lines.push(`${d.label}: Sys <strong>${d.systemizing.toFixed(2)}</strong> · Emp <strong>${d.empathy.toFixed(2)}</strong>`);
+    });
+
+    [...selectedCombos].forEach((key) => {
       const label = labelForComboKey(key);
       const combo = DEMOGRAPHIC_COMBOS[key];
-      if (!combo) return `${label} — not available`;
-      return `${label}: Sys <strong>${combo.systemizing.toFixed(2)}</strong> · Emp <strong>${combo.empathy.toFixed(2)}</strong>`;
+      if (!combo) {
+        lines.push(`${label} — not available`);
+        return;
+      }
+      lines.push(`${label}: Sys <strong>${combo.systemizing.toFixed(2)}</strong> · Emp <strong>${combo.empathy.toFixed(2)}</strong>`);
     });
 
     let comparison = `My result: systemizing ${MY_RESULT.systemizing.toFixed(2)}, empathizing ${MY_RESULT.empathy.toFixed(2)}`;
@@ -640,95 +645,16 @@ function updateFilteredMessage(override) {
     }
 
     el.innerHTML = `
-      <strong>Combo comparison:</strong><br>
+      <strong>Selection comparison:</strong><br>
       ${lines.join('<br>')}
-      <br><small>YourMorals.org API averages for each combination.</small>
+      <br><small>YourMorals.org API averages for each group shown.</small>
       <br><small>${comparison}</small>
     `;
     el.classList.add('visible');
     return;
   }
 
-  if (selectedDemographics.size === 0) {
-    el.classList.remove('visible');
-    return;
-  }
-
-  const labels = [...selectedDemographics].map((id) => {
-    return DEMOGRAPHICS.find((d) => d.id === id).label;
-  });
-
-  const { systemizing: avgSys, empathy: avgEmp, fromApi, unavailable } = getSelectedAverage();
-
-  let comparison = `My result: systemizing ${MY_RESULT.systemizing.toFixed(2)}, empathizing ${MY_RESULT.empathy.toFixed(2)}`;
-  if (visitorResults) {
-    comparison = `Your result: systemizing ${visitorResults.systemizing.toFixed(2)}, empathizing ${visitorResults.empathy.toFixed(2)} &nbsp;|&nbsp; ${comparison}`;
-  }
-
-  let sourceNote;
-  if (unavailable === 'no_data') {
-    sourceNote = 'YourMorals.org reports no data available for this filter combination.';
-  } else if (unavailable === 'not_enough') {
-    sourceNote = 'YourMorals.org reports not enough data for this filter combination (sample too small).';
-  } else if (fromApi) {
-    sourceNote = 'YourMorals.org API average for this filter combination.';
-  } else {
-    sourceNote = 'Estimated by averaging single-group values (exact combo not yet captured).';
-  }
-
-  const averagesBlock = unavailable
-    ? ''
-    : `Average systemizing: <strong>${avgSys.toFixed(2)}</strong> &nbsp;|&nbsp;
-    Average empathizing: <strong>${avgEmp.toFixed(2)}</strong><br>`;
-
-  el.innerHTML = `
-    <strong>Filtered comparison:</strong> ${labels.join(' + ')}<br>
-    ${averagesBlock}
-    <small>${sourceNote}</small>
-    <br><small>${comparison}</small>
-  `;
-  el.classList.add('visible');
-}
-
-function getSelectedAverage() {
-  if (selectedCombos.size > 0) {
-    const combos = [...selectedCombos]
-      .map((key) => DEMOGRAPHIC_COMBOS[key])
-      .filter(Boolean);
-    if (combos.length === 0) {
-      return { systemizing: null, empathy: null, fromApi: false, unavailable: null };
-    }
-    return {
-      systemizing: combos.reduce((acc, c) => acc + c.systemizing, 0) / combos.length,
-      empathy: combos.reduce((acc, c) => acc + c.empathy, 0) / combos.length,
-      fromApi: true,
-      unavailable: null,
-    };
-  }
-
-  const ids = [...selectedDemographics].sort();
-  const categories = ids.map((id) => DEMOGRAPHICS.find((d) => d.id === id).category);
-  const uniqueCategories = new Set(categories);
-
-  if (ids.length >= 2 && uniqueCategories.size === ids.length) {
-    const key = ids.join(',');
-    const status = getComboStatus(key);
-    if (status === 'no_data' || status === 'not_enough') {
-      return { systemizing: null, empathy: null, fromApi: false, unavailable: status };
-    }
-    const combo = DEMOGRAPHIC_COMBOS[key];
-    if (combo) {
-      return { systemizing: combo.systemizing, empathy: combo.empathy, fromApi: true, unavailable: null };
-    }
-  }
-
-  const items = ids.map((id) => DEMOGRAPHICS.find((d) => d.id === id));
-  return {
-    systemizing: items.reduce((acc, d) => acc + d.systemizing, 0) / items.length,
-    empathy: items.reduce((acc, d) => acc + d.empathy, 0) / items.length,
-    fromApi: false,
-    unavailable: null,
-  };
+  el.classList.remove('visible');
 }
 
 function initResults() {
