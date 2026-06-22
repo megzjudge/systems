@@ -679,6 +679,10 @@ a:hover { color: var(--accent-hover); }
   align-items: start;
 }
 
+.combo-columns-quad {
+  grid-template-columns: 1fr 1fr;
+}
+
 .combo-column-header {
   font-size: 0.7rem;
   font-weight: 600;

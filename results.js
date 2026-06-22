@@ -4,7 +4,7 @@ const selectedDemographics = new Set();
 let showPersonalOnly = false;
 let massPreset = null;
 let massPresetBars = null;
-let selectedCombo = null;
+const selectedCombos = new Set();
 const barColorMap = new Map();
 const demographicColorById = new Map();
 let visitorColor = null;
@@ -162,7 +162,7 @@ function resetVisitorColor() {
 }
 
 function clearComboSelection() {
-  selectedCombo = null;
+  selectedCombos.clear();
   document.querySelectorAll('.combo-item-btn.active').forEach((btn) => {
     btn.classList.remove('active');
   });
@@ -249,13 +249,18 @@ function getVisibleDemographics() {
     return [...personal, ...massPresetBars];
   }
 
-  if (selectedCombo && DEMOGRAPHIC_COMBOS[selectedCombo]) {
-    const combo = DEMOGRAPHIC_COMBOS[selectedCombo];
-    return [...personal, {
-      label: labelForComboKey(selectedCombo),
-      systemizing: combo.systemizing,
-      empathy: combo.empathy,
-    }];
+  if (selectedCombos.size > 0) {
+    const comboBars = [...selectedCombos]
+      .filter((key) => DEMOGRAPHIC_COMBOS[key])
+      .map((key) => {
+        const combo = DEMOGRAPHIC_COMBOS[key];
+        return {
+          label: labelForComboKey(key),
+          systemizing: combo.systemizing,
+          empathy: combo.empathy,
+        };
+      });
+    return [...personal, ...comboBars];
   }
 
   const checked = DEMOGRAPHICS.filter((d) => selectedDemographics.has(d.id));
@@ -440,15 +445,19 @@ function applyComboSelection(combo) {
   selectedDemographics.clear();
   showPersonalOnly = false;
   clearMassPreset();
-  selectedCombo = combo.key;
+
+  if (selectedCombos.has(combo.key)) {
+    selectedCombos.delete(combo.key);
+  } else {
+    selectedCombos.add(combo.key);
+  }
 
   document.querySelectorAll('.checkbox-list input[type="checkbox"]').forEach((input) => {
     input.checked = false;
   });
-  document.querySelectorAll('.combo-item-btn.active').forEach((btn) => {
-    btn.classList.remove('active');
+  document.querySelectorAll('.combo-item-btn').forEach((btn) => {
+    btn.classList.toggle('active', selectedCombos.has(btn.dataset.comboKey));
   });
-  document.querySelector(`.combo-item-btn[data-combo-key="${combo.key}"]`)?.classList.add('active');
 
   updateFilteredMessage();
   renderChart();
@@ -469,7 +478,9 @@ function renderComboPanel(section, categoryKey) {
   panel.hidden = true;
 
   const columns = document.createElement('div');
-  columns.className = 'combo-columns';
+  columns.className = grouped.length === 4
+    ? 'combo-columns combo-columns-quad'
+    : 'combo-columns';
 
   const statusLabels = {
     no_data: 'no data',
@@ -498,7 +509,7 @@ function renderComboPanel(section, categoryKey) {
         btn.type = 'button';
         btn.className = 'combo-item-btn';
         btn.dataset.comboKey = combo.key;
-        if (selectedCombo === combo.key) btn.classList.add('active');
+        if (selectedCombos.has(combo.key)) btn.classList.add('active');
         btn.textContent = combo.partnerLabel;
         btn.addEventListener('click', () => applyComboSelection(combo));
         li.appendChild(btn);
@@ -615,28 +626,23 @@ function updateFilteredMessage(override) {
     return;
   }
 
-  if (selectedCombo) {
-    const label = labelForComboKey(selectedCombo);
-    const { systemizing: avgSys, empathy: avgEmp, fromApi, unavailable } = getSelectedAverage();
+  if (selectedCombos.size > 0) {
+    const lines = [...selectedCombos].map((key) => {
+      const label = labelForComboKey(key);
+      const combo = DEMOGRAPHIC_COMBOS[key];
+      if (!combo) return `${label} — not available`;
+      return `${label}: Sys <strong>${combo.systemizing.toFixed(2)}</strong> · Emp <strong>${combo.empathy.toFixed(2)}</strong>`;
+    });
 
     let comparison = `My result: systemizing ${MY_RESULT.systemizing.toFixed(2)}, empathizing ${MY_RESULT.empathy.toFixed(2)}`;
     if (visitorResults) {
       comparison = `Your result: systemizing ${visitorResults.systemizing.toFixed(2)}, empathizing ${visitorResults.empathy.toFixed(2)} &nbsp;|&nbsp; ${comparison}`;
     }
 
-    const sourceNote = fromApi
-      ? 'YourMorals.org API average for this filter combination.'
-      : 'Estimated by averaging single-group values (exact combo not yet captured).';
-
-    const averagesBlock = unavailable
-      ? ''
-      : `Average systemizing: <strong>${avgSys.toFixed(2)}</strong> &nbsp;|&nbsp;
-      Average empathizing: <strong>${avgEmp.toFixed(2)}</strong><br>`;
-
     el.innerHTML = `
-      <strong>Filtered comparison:</strong> ${label}<br>
-      ${averagesBlock}
-      <small>${sourceNote}</small>
+      <strong>Combo comparison:</strong><br>
+      ${lines.join('<br>')}
+      <br><small>YourMorals.org API averages for each combination.</small>
       <br><small>${comparison}</small>
     `;
     el.classList.add('visible');
@@ -685,15 +691,19 @@ function updateFilteredMessage(override) {
 }
 
 function getSelectedAverage() {
-  if (selectedCombo) {
-    const status = getComboStatus(selectedCombo);
-    if (status === 'no_data' || status === 'not_enough') {
-      return { systemizing: null, empathy: null, fromApi: false, unavailable: status };
+  if (selectedCombos.size > 0) {
+    const combos = [...selectedCombos]
+      .map((key) => DEMOGRAPHIC_COMBOS[key])
+      .filter(Boolean);
+    if (combos.length === 0) {
+      return { systemizing: null, empathy: null, fromApi: false, unavailable: null };
     }
-    const combo = DEMOGRAPHIC_COMBOS[selectedCombo];
-    if (combo) {
-      return { systemizing: combo.systemizing, empathy: combo.empathy, fromApi: true, unavailable: null };
-    }
+    return {
+      systemizing: combos.reduce((acc, c) => acc + c.systemizing, 0) / combos.length,
+      empathy: combos.reduce((acc, c) => acc + c.empathy, 0) / combos.length,
+      fromApi: true,
+      unavailable: null,
+    };
   }
 
   const ids = [...selectedDemographics].sort();
