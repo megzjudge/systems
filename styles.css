@@ -14,7 +14,7 @@
   --shadow: 0 2px 12px rgba(44, 42, 38, 0.06);
 }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
 
 body {
   font-family: 'Source Sans 3', system-ui, sans-serif;
@@ -22,6 +22,7 @@ body {
   color: var(--text);
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 a { color: var(--accent); }
@@ -81,6 +82,10 @@ a:hover { color: var(--accent-hover); }
   padding: 56px 0 48px;
   text-align: center;
   background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+}
+
+.hero .container {
+  max-width: 36rem;
 }
 
 .eyebrow {
@@ -561,7 +566,62 @@ a:hover { color: var(--accent-hover); }
 }
 
 @media (max-width: 640px) {
-  .header-inner { flex-direction: column; height: auto; padding: 14px 0; gap: 10px; }
+  .container,
+  .container-wide { padding: 0 16px; }
+
+  .header-inner {
+    flex-direction: column;
+    align-items: stretch;
+    height: auto;
+    padding: 10px 0;
+    gap: 8px;
+  }
+
+  .logo {
+    text-align: center;
+    font-size: 1.05rem;
+  }
+
+  .nav {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px 12px;
+  }
+
+  .nav-link { font-size: 0.8rem; }
+
+  .hero {
+    padding: 24px 0 28px;
+    min-height: calc(100svh - 5.5rem);
+    display: flex;
+    align-items: center;
+  }
+
+  .hero h1 {
+    font-size: 1.6rem;
+    line-height: 1.2;
+    margin-bottom: 10px;
+    overflow-wrap: anywhere;
+  }
+
+  .lead {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 18px;
+    overflow-wrap: anywhere;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+    padding: 11px 20px;
+    font-size: 0.9rem;
+  }
+
   .score-summary { grid-template-columns: 1fr; }
   .chart-wrap { height: 340px; }
   .likert-option { min-width: 100%; }
