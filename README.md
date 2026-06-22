@@ -1,6 +1,6 @@
 # Systems & Feelings Survey
 
-Interactive visualization of empathizing and systemizing psychology scores, sourced from [YourMorals.org](https://yourmorals.org/).
+Interactive visualization of empathizing and systemizing scores, sourced from [YourMorals.org](https://yourmorals.org/).
 
 ## What it does
 
