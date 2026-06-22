@@ -1,41 +1,6 @@
-const LIKERT_LABELS = [
-  { value: 1, label: 'Strongly disagree' },
-  { value: 2, label: 'Disagree' },
-  { value: 3, label: 'Agree' },
-  { value: 4, label: 'Strongly agree' },
-];
+// Illustrative demographic averages — approximated from public YourMorals.org result charts.
+// This site does not host or reproduce the survey itself.
 
-const SYSTEMIZING_ITEMS = [
-  'I am fascinated by how machines work.',
-  'I enjoy learning about how things are made.',
-  'If I were buying a car, I would want to obtain exact details about the engine capacity.',
-  'When I listen to a piece of music, I always notice the way it is structured.',
-  'I like to carefully plan any activities I participate in.',
-  'I am interested in knowing the path a river takes before it reaches the sea.',
-  'When I look at a piece of furniture, I do not notice the details of how it was constructed.',
-  'I find it difficult to read and understand maps.',
-  'If there was a problem with the electrical wiring in my home, I would be able to fix it myself.',
-  'When I travel, I like to learn specific details about the culture of the place I am visiting.',
-];
-
-const EMPATHY_ITEMS = [
-  'I can easily tell if someone else wants to enter a conversation.',
-  'I find it hard to know what to do in a social situation.',
-  'I really enjoy caring for other people.',
-  'I find it difficult to work out people\'s intentions.',
-  'I am good at predicting how someone will feel.',
-  'I find it easy to put myself in somebody else\'s shoes.',
-  'I am good at predicting what someone will do.',
-  'I tend to have emotional reactions to what others are feeling.',
-  'I can tune into how someone else feels rapidly and intuitively.',
-  'I can easily work out what another person might want to talk about.',
-];
-
-// Reverse-scored items (1-indexed within each subscale)
-const SYSTEMIZING_REVERSE = [7, 8];
-const EMPATHY_REVERSE = [2, 4];
-
-// Demographic averages (approximated from YourMorals.org population data)
 const DEMOGRAPHICS = [
   { id: 'my-result', label: 'My Result', category: 'personal', color: '#8b9a6b', systemizing: null, empathy: null, alwaysShow: true },
   { id: 'male', label: 'Male', category: 'gender', color: '#7cb87c', systemizing: 2.8, empathy: 2.8 },
@@ -69,19 +34,6 @@ const DEMOGRAPHIC_CATEGORIES = [
 ];
 
 const DEFAULT_RESULTS = { systemizing: 3.3, empathy: 2.95 };
-
-function reverseScore(value) {
-  return 5 - value;
-}
-
-function computeSubscaleScore(answers, reverseItems) {
-  const scored = answers.map((val, i) => {
-    const oneBased = i + 1;
-    return reverseItems.includes(oneBased) ? reverseScore(val) : val;
-  });
-  const sum = scored.reduce((a, b) => a + b, 0);
-  return Math.round((sum / scored.length) * 100) / 100;
-}
 
 function saveResults(systemizing, empathy) {
   localStorage.setItem('sf-results', JSON.stringify({ systemizing, empathy }));

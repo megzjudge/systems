@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Systems &amp; Feelings Survey — empathizing and systemizing preferences, inspired by YourMorals.org">
-  <title>Systems &amp; Feelings Survey</title>
+  <meta name="description" content="A personal results viewer for the Systems &amp; Feelings Survey on YourMorals.org">
+  <title>Systems &amp; Feelings — Results Viewer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
@@ -16,8 +16,8 @@
       <a href="index.html" class="logo">Systems &amp; Feelings</a>
       <nav class="nav">
         <a href="index.html" class="nav-link active">About</a>
-        <a href="survey.html" class="nav-link">Take the Survey</a>
-        <a href="results.html" class="nav-link">Results</a>
+        <a href="https://www.yourmorals.org/" class="nav-link" target="_blank" rel="noopener">Take on YourMorals.org ↗</a>
+        <a href="results.html" class="nav-link">Visualize Results</a>
       </nav>
     </div>
   </header>
@@ -25,71 +25,61 @@
   <main>
     <section class="hero">
       <div class="container">
-        <p class="eyebrow">Inspired by <a href="https://yourmorals.org/" target="_blank" rel="noopener">YourMorals.org</a></p>
+        <p class="eyebrow">A personal results viewer — not the official survey</p>
         <h1>Systems &amp; Feelings Survey</h1>
-        <p class="lead">Which kind of understanding do you prefer?</p>
-        <a href="survey.html" class="btn btn-primary">Start the Survey</a>
+        <p class="lead">Explore empathizing and systemizing scores from the research site <a href="https://www.yourmorals.org/" target="_blank" rel="noopener">YourMorals.org</a>.</p>
+        <div class="hero-actions">
+          <a href="https://www.yourmorals.org/" class="btn btn-primary" target="_blank" rel="noopener">Take the Official Survey ↗</a>
+          <a href="results.html" class="btn btn-secondary">Enter My Scores</a>
+        </div>
       </div>
     </section>
 
     <section class="content-section">
       <div class="container prose">
-        <h2>About this scale</h2>
+        <div class="callout callout-warning">
+          <p>
+            <strong>This is not a copy of the survey.</strong> The Systems &amp; Feelings Survey,
+            its items, and scoring belong to the researchers at
+            <a href="https://www.yourmorals.org/" target="_blank" rel="noopener">YourMorals.org</a>
+            and Simon Baron-Cohen&rsquo;s empathizing/systemizing scales. This site only helps you
+            visualize scores you already received from the official site.
+          </p>
+        </div>
+
+        <h2>What the survey measures</h2>
         <p>
-          The scale you complete is a combination of the <strong>Empathizing</strong> and
-          <strong>Systemizing</strong> scales, created by Simon Baron-Cohen at Cambridge University.
-          (We use 10 items from each scale; the original uses 20 from each.)
+          The official survey combines two well-known psychology scales. <strong>Empathizing</strong>
+          reflects interest in understanding other people&rsquo;s emotions and thoughts.
+          <strong>Systemizing</strong> reflects interest in analyzing patterns, rules, and how
+          systems work. Baron-Cohen&rsquo;s research links these traits to sex differences, autism
+          spectrum conditions, and — in the YourMorals version — political psychology.
         </p>
         <p>
-          The scale measures two abilities or preferences on which human minds differ.
-          <strong>Empathizing</strong> is &ldquo;the drive to identify another person&rsquo;s emotions and
-          thoughts, and to respond to these with an appropriate emotion.&rdquo;
-          <strong>Systemizing</strong> is &ldquo;the drive to analyze the variables in a system, and to
-          derive the underlying rules that govern the behavior of the system.&rdquo; In short,
-          empathizing is about understanding the social world whereas systemizing is about
-          understanding the world of inanimate objects and nature.
+          On YourMorals.org, researchers ask whether liberals and conservatives differ in these
+          traits, and whether those patterns look different for men and women. Scores run from
+          1 to 4 on each dimension, with higher numbers meaning stronger preference or ability.
         </p>
 
-        <h2>Why this matters</h2>
-        <p>
-          Baron-Cohen has found large sex differences on both traits. Men tend to score higher than
-          women on systemizing and lower than women on empathizing. But his main interest is not sex
-          differences — it is autism. He has found that people with mild autism or Asperger&rsquo;s
-          syndrome seem to have a kind of &ldquo;extreme male brain.&rdquo; They love mechanical and
-          classificatory systems and find it very difficult to get inside people&rsquo;s heads and
-          understand emotional reactions.
-        </p>
-        <p>
-          We are interested in Baron-Cohen&rsquo;s work for political psychology because there are
-          two competing stereotypes about liberals and conservatives. On one hand, conservatives are
-          thought to be a bit more &ldquo;macho&rdquo; or masculine than liberals (at least for men),
-          but on the other hand, many political theorists have linked liberalism with a tendency to
-          abstraction and to thinking about society as a system that can be managed and optimized. We
-          therefore can&rsquo;t predict whether liberals or conservatives will show the more
-          &ldquo;male&rdquo; pattern of lower empathy and higher systemizing. Or might liberals score
-          higher on both empathizing and systemizing? Will the story be different for men and women?
-          Let&rsquo;s see!
-        </p>
-
-        <h2>Scoring</h2>
-        <p>
-          Scores for systemizing range from 1 to 4, and higher numbers indicate a higher degree of
-          systemizing. Scores for empathizing also range from 1 to 4, and higher numbers indicate a
-          higher degree of empathizing.
-        </p>
+        <h2>How to use this site</h2>
+        <ol class="steps-list">
+          <li>Register and take the <strong>Systems &amp; Feelings Survey</strong> at <a href="https://www.yourmorals.org/" target="_blank" rel="noopener">yourmorals.org</a> (under &ldquo;Explore Your Morals&rdquo; after signing in).</li>
+          <li>Note your systemizing and empathizing scores from the results page.</li>
+          <li>Come back here and <a href="results.html">enter those scores</a> to see a comparison chart with demographic filters.</li>
+        </ol>
 
         <div class="callout">
           <p>
-            To learn more about systemizing, empathizing, and the scales you just took, see
-            <a href="https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.590.9949&amp;rep=rep1&amp;type=pdf" target="_blank" rel="noopener">this article by Daniel Nettle</a>
-            and the
-            <a href="https://en.wikipedia.org/wiki/Simon_Baron-Cohen" target="_blank" rel="noopener">Wikipedia page on Simon Baron-Cohen</a>.
+            Learn more about the underlying research:
+            <a href="https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.590.9949&amp;rep=rep1&amp;type=pdf" target="_blank" rel="noopener">Daniel Nettle&rsquo;s article</a>
+            and
+            <a href="https://en.wikipedia.org/wiki/Simon_Baron-Cohen" target="_blank" rel="noopener">Simon Baron-Cohen on Wikipedia</a>.
           </p>
         </div>
 
         <p class="source-note">
-          Source: <a href="https://yourmorals.org/" target="_blank" rel="noopener">yourmorals.org</a>
-          — a research site about morality, values, and psychology.
+          Survey copyright and data collection: <a href="https://www.yourmorals.org/" target="_blank" rel="noopener">YourMorals.org</a>.
+          This viewer is an independent, non-commercial fan project with no affiliation.
         </p>
       </div>
     </section>
@@ -97,7 +87,7 @@
 
   <footer class="site-footer">
     <div class="container">
-      <p>Educational demo inspired by <a href="https://yourmorals.org/" target="_blank" rel="noopener">YourMorals.org</a>. Not affiliated with the original researchers.</p>
+      <p>Not affiliated with YourMorals.org or the original researchers. Take the real survey there.</p>
     </div>
   </footer>
 </body>

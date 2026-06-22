@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Your Results — Systems &amp; Feelings</title>
+  <title>Visualize Results — Systems &amp; Feelings</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
@@ -16,17 +16,33 @@
       <a href="index.html" class="logo">Systems &amp; Feelings</a>
       <nav class="nav">
         <a href="index.html" class="nav-link">About</a>
-        <a href="survey.html" class="nav-link">Take the Survey</a>
-        <a href="results.html" class="nav-link active">Results</a>
+        <a href="https://www.yourmorals.org/" class="nav-link" target="_blank" rel="noopener">Take on YourMorals.org ↗</a>
+        <a href="results.html" class="nav-link active">Visualize Results</a>
       </nav>
     </div>
   </header>
 
   <main class="container-wide">
     <div class="results-header">
-      <h1>Your Results</h1>
-      <p>Compare your score against others&rsquo; scores on the Systems &amp; Feelings Survey.</p>
+      <h1>Visualize Your Results</h1>
+      <p>Enter the scores from your <a href="https://www.yourmorals.org/" target="_blank" rel="noopener">YourMorals.org</a> results page to compare against demographic averages.</p>
     </div>
+
+    <section class="score-entry-section">
+      <h2>Your scores from YourMorals.org</h2>
+      <form id="score-form" class="score-entry-form">
+        <div class="score-input-group">
+          <label for="input-systemizing">Systemizing (1.0 – 4.0)</label>
+          <input type="number" id="input-systemizing" min="1" max="4" step="0.01" required>
+        </div>
+        <div class="score-input-group">
+          <label for="input-empathy">Empathizing (1.0 – 4.0)</label>
+          <input type="number" id="input-empathy" min="1" max="4" step="0.01" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Update Chart</button>
+      </form>
+      <p class="score-entry-hint">Find these numbers on your official results page after completing the Systems &amp; Feelings Survey.</p>
+    </section>
 
     <div class="score-summary">
       <div class="score-card">
@@ -43,7 +59,7 @@
 
     <section class="chart-section">
       <h2>Compare your score against others&rsquo; scores</h2>
-      <p class="subtitle">Your result (olive bar) shown alongside demographic averages from YourMorals.org users.</p>
+      <p class="subtitle">Your result (olive bar) alongside illustrative demographic averages. Demographic data is approximated from public YourMorals.org charts — not live data.</p>
       <div class="chart-wrap">
         <canvas id="results-chart"></canvas>
       </div>
@@ -52,29 +68,28 @@
     <section class="compare-section">
       <h2>Filter by demographics</h2>
       <p class="compare-intro">
-        Select up to three demographics below. Check specific groups to highlight them on the chart.
-        Example: selecting &ldquo;Gender: Female&rdquo; and &ldquo;Religiosity: Very Religious&rdquo; compares
-        you against the average of very religious females.
+        Select up to three groups to highlight on the chart — similar to the filters on
+        YourMorals.org&rsquo;s results page.
       </p>
 
       <div class="demographic-groups" id="demographic-groups"></div>
 
       <p class="selection-hint">
-        Tip: Some combinations have limited data. For better results, select fewer demographics.
-        The score will be unavailable if some questions are unanswered.
+        Demographic averages are illustrative. For authoritative comparisons, use the official
+        results page at <a href="https://www.yourmorals.org/" target="_blank" rel="noopener">yourmorals.org</a>.
       </p>
 
       <div class="filtered-result" id="filtered-result"></div>
     </section>
 
     <div style="text-align: center; padding-bottom: 48px;">
-      <a href="survey.html" class="btn btn-secondary">Retake Survey</a>
+      <a href="https://www.yourmorals.org/" class="btn btn-secondary" target="_blank" rel="noopener">Back to Official Survey ↗</a>
     </div>
   </main>
 
   <footer class="site-footer">
     <div class="container">
-      <p>Educational demo inspired by <a href="https://yourmorals.org/" target="_blank" rel="noopener">YourMorals.org</a>.</p>
+      <p>Not affiliated with YourMorals.org. Scores must come from the official survey.</p>
     </div>
   </footer>
 

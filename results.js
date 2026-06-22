@@ -90,6 +90,13 @@ function renderChart() {
   });
 }
 
+function updateScoreDisplay() {
+  document.getElementById('score-systemizing').textContent = userResults.systemizing.toFixed(2);
+  document.getElementById('score-empathy').textContent = userResults.empathy.toFixed(2);
+  document.getElementById('input-systemizing').value = userResults.systemizing;
+  document.getElementById('input-empathy').value = userResults.empathy;
+}
+
 function renderDemographicFilters() {
   const container = document.getElementById('demographic-groups');
 
@@ -173,9 +180,24 @@ function averageSelected(field) {
 
 function initResults() {
   userResults = loadResults();
+  updateScoreDisplay();
 
-  document.getElementById('score-systemizing').textContent = userResults.systemizing.toFixed(2);
-  document.getElementById('score-empathy').textContent = userResults.empathy.toFixed(2);
+  document.getElementById('score-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const systemizing = parseFloat(document.getElementById('input-systemizing').value);
+    const empathy = parseFloat(document.getElementById('input-empathy').value);
+
+    if (systemizing < 1 || systemizing > 4 || empathy < 1 || empathy > 4) {
+      alert('Scores must be between 1.0 and 4.0.');
+      return;
+    }
+
+    userResults = { systemizing, empathy };
+    saveResults(systemizing, empathy);
+    updateScoreDisplay();
+    renderChart();
+    updateFilteredMessage();
+  });
 
   renderDemographicFilters();
   renderChart();
