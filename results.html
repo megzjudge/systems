@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Results — Systems &amp; Feelings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">Systems &amp; Feelings</a>
+      <nav class="nav">
+        <a href="index.html" class="nav-link">About</a>
+        <a href="survey.html" class="nav-link">Take the Survey</a>
+        <a href="results.html" class="nav-link active">Results</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container-wide">
+    <div class="results-header">
+      <h1>Your Results</h1>
+      <p>Compare your score against others&rsquo; scores on the Systems &amp; Feelings Survey.</p>
+    </div>
+
+    <div class="score-summary">
+      <div class="score-card">
+        <div class="label">Systemizing</div>
+        <div class="value" id="score-systemizing">—</div>
+        <div class="range">Scale: 1.0 – 4.0</div>
+      </div>
+      <div class="score-card">
+        <div class="label">Empathizing</div>
+        <div class="value" id="score-empathy">—</div>
+        <div class="range">Scale: 1.0 – 4.0</div>
+      </div>
+    </div>
+
+    <section class="chart-section">
+      <h2>Compare your score against others&rsquo; scores</h2>
+      <p class="subtitle">Your result (olive bar) shown alongside demographic averages from YourMorals.org users.</p>
+      <div class="chart-wrap">
+        <canvas id="results-chart"></canvas>
+      </div>
+    </section>
+
+    <section class="compare-section">
+      <h2>Filter by demographics</h2>
+      <p class="compare-intro">
+        Select up to three demographics below. Check specific groups to highlight them on the chart.
+        Example: selecting &ldquo;Gender: Female&rdquo; and &ldquo;Religiosity: Very Religious&rdquo; compares
+        you against the average of very religious females.
+      </p>
+
+      <div class="demographic-groups" id="demographic-groups"></div>
+
+      <p class="selection-hint">
+        Tip: Some combinations have limited data. For better results, select fewer demographics.
+        The score will be unavailable if some questions are unanswered.
+      </p>
+
+      <div class="filtered-result" id="filtered-result"></div>
+    </section>
+
+    <div style="text-align: center; padding-bottom: 48px;">
+      <a href="survey.html" class="btn btn-secondary">Retake Survey</a>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Educational demo inspired by <a href="https://yourmorals.org/" target="_blank" rel="noopener">YourMorals.org</a>.</p>
+    </div>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="results.js"></script>
+</body>
+</html>
