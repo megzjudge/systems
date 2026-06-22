@@ -33,7 +33,7 @@ Two-filter combos are captured from YourMorals `average1` API responses. Groups 
 ## Credits
 
 - Survey and demographic data: [YourMorals.org](https://yourmorals.org/) (Jonathan Haidt et al.)
-- Scale based on Simon Baron-Cohen’s empathizing–systemizing research
+- Scale based on Simon Baron-Cohen’s empathizing–systemizing psychology test research
 
 ## License
 
