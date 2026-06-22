@@ -33,12 +33,12 @@ const DEMOGRAPHICS = [
 ];
 
 const DEMOGRAPHIC_CATEGORIES = [
-  { key: 'age', title: 'Age' },
-  { key: 'education', title: 'Education' },
   { key: 'gender', title: 'Gender' },
-  { key: 'race', title: 'Race' },
-  { key: 'religiosity', title: 'Religiosity' },
+  { key: 'age', title: 'Age' },
   { key: 'political', title: 'Political Ideology' },
+  { key: 'religiosity', title: 'Religiosity' },
+  { key: 'education', title: 'Education' },
+  { key: 'race', title: 'Race' },
 ];
 
 function saveVisitorResults(systemizing, empathy) {
