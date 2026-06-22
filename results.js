@@ -4,6 +4,65 @@ const selectedDemographics = new Set();
 let showPersonalOnly = false;
 let massPreset = null;
 let massPresetBars = null;
+let colorViewKey = '';
+let colorRotation = 0;
+
+function hslToHex(h, s, l) {
+  s /= 100;
+  l /= 100;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n) => {
+    const k = (n + h / 30) % 12;
+    return l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+  };
+  const toHex = (x) => Math.round(x * 255).toString(16).padStart(2, '0');
+  return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
+}
+
+const COLOR_POOL = Array.from({ length: 160 }, (_, i) => {
+  const hue = (i * 137.508 + 17) % 360;
+  const sat = 48 + (i % 5) * 4;
+  const light = 54 + (i % 4) * 5;
+  return hslToHex(hue, sat, light);
+});
+
+function assignBarColors(groups) {
+  const rotatable = groups.filter((g) => g.label !== MY_RESULT.label);
+  const key = rotatable.map((g) => g.label).sort().join('|');
+
+  if (key !== colorViewKey) {
+    colorViewKey = key;
+    colorRotation = (colorRotation + 11) % COLOR_POOL.length;
+  }
+
+  const pool = [...COLOR_POOL.slice(colorRotation), ...COLOR_POOL.slice(0, colorRotation)];
+  const used = new Set([MY_RESULT.color]);
+  let poolIndex = 0;
+
+  const nextColor = () => {
+    while (poolIndex < pool.length) {
+      const color = pool[poolIndex++];
+      if (color !== MY_RESULT.color && !used.has(color)) {
+        used.add(color);
+        return color;
+      }
+    }
+    let hue = (colorRotation * 13 + used.size * 47) % 360;
+    while (used.has(hslToHex(hue, 55, 60))) {
+      hue = (hue + 23) % 360;
+    }
+    const fallback = hslToHex(hue, 55, 60);
+    used.add(fallback);
+    return fallback;
+  };
+
+  return groups.map((g) => {
+    if (g.label === MY_RESULT.label) {
+      return { ...g, color: MY_RESULT.color };
+    }
+    return { ...g, color: nextColor() };
+  });
+}
 
 function clearMassPreset() {
   massPreset = null;
@@ -22,7 +81,6 @@ function getAllScoredGroups() {
     label: d.label,
     systemizing: d.systemizing,
     empathy: d.empathy,
-    color: d.color,
   }));
 
   Object.entries(DEMOGRAPHIC_COMBOS).forEach(([key, scores]) => {
@@ -30,7 +88,6 @@ function getAllScoredGroups() {
       label: labelForComboKey(key),
       systemizing: scores.systemizing,
       empathy: scores.empathy,
-      color: COMBO_BAR_COLOR,
     });
   });
 
@@ -68,7 +125,6 @@ function getPersonalBars() {
       label: 'Your Result',
       systemizing: visitorResults.systemizing,
       empathy: visitorResults.empathy,
-      color: YOUR_RESULT_COLOR,
     });
   }
 
@@ -76,7 +132,6 @@ function getPersonalBars() {
     label: MY_RESULT.label,
     systemizing: MY_RESULT.systemizing,
     empathy: MY_RESULT.empathy,
-    color: MY_RESULT.color,
   });
 
   return bars;
@@ -102,6 +157,17 @@ function getVisibleDemographics() {
   return [...personal, ...DEMOGRAPHICS];
 }
 
+function resetToDefaultChart() {
+  selectedDemographics.clear();
+  showPersonalOnly = false;
+  clearMassPreset();
+  document.querySelectorAll('.checkbox-list input[type="checkbox"]').forEach((input) => {
+    input.checked = false;
+  });
+  updateFilteredMessage();
+  renderChart();
+}
+
 function clearDemographics() {
   selectedDemographics.clear();
   showPersonalOnly = true;
@@ -114,9 +180,10 @@ function clearDemographics() {
 }
 
 function buildChartData(groups) {
+  const colored = assignBarColors(groups);
   return {
     labels: ['Systemizing Items', 'Empathy Items'],
-    datasets: groups.map((g) => ({
+    datasets: colored.map((g) => ({
       label: g.label,
       data: [g.systemizing, g.empathy],
       backgroundColor: g.color + '99',
@@ -491,6 +558,7 @@ function initResults() {
   });
 
   document.getElementById('clear-demographics-btn').addEventListener('click', clearDemographics);
+  document.getElementById('reset-chart-btn').addEventListener('click', resetToDefaultChart);
 
   document.querySelectorAll('.mass-preset-btn').forEach((btn) => {
     btn.addEventListener('click', () => applyMassPreset(btn.dataset.preset));

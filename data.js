@@ -8,7 +8,6 @@ const MY_RESULT = {
 };
 
 const YOUR_RESULT_COLOR = '#4a6fa5';
-const COMBO_BAR_COLOR = '#b0b8c4';
 
 const MASS_PRESET_LABELS = {
   'low-empathy': 'Lowest 10 empathizing (singles + combos)',
