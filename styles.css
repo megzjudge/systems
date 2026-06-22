@@ -571,85 +571,53 @@ a:hover { color: var(--accent-hover); }
 }
 
 .demographic-groups {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0;
-  line-height: 1.4;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 40px;
+  align-items: start;
 }
 
-.demographic-category {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  max-width: 100%;
+.demographic-column {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
 .demographic-category h3 {
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 0.82rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   color: var(--muted);
-  margin: 0;
-  padding: 8px 10px 8px 0;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.demographic-category:not(:first-child) h3 {
-  padding-left: 10px;
-  border-left: 1px solid var(--border);
-  margin-left: 2px;
+  margin-bottom: 6px;
 }
 
 .checkbox-list {
   list-style: none;
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   margin: 0;
   padding: 0;
 }
 
-.checkbox-list li {
-  display: inline-flex;
-}
-
 .checkbox-list label {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   font-size: 0.88rem;
   cursor: pointer;
-  padding: 7px 10px;
-  margin: 0;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  white-space: nowrap;
-}
-
-.checkbox-list li + li label {
-  border-left: none;
-}
-
-.checkbox-list label:has(input:checked) {
-  background: var(--accent-light);
-  border-color: var(--accent);
-  color: var(--accent-hover);
-  font-weight: 600;
-  z-index: 1;
-  position: relative;
+  padding: 5px 0;
+  line-height: 1.35;
 }
 
 .checkbox-list label:hover {
-  background: var(--accent-light);
+  color: var(--accent);
 }
 
 .checkbox-list input[type="checkbox"] {
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
   accent-color: var(--accent);
   flex-shrink: 0;
 }
@@ -749,19 +717,9 @@ a:hover { color: var(--accent-hover); }
     grid-template-columns: 1fr;
   }
 
-  .demographic-category {
-    flex-basis: 100%;
-  }
-
-  .demographic-category:not(:first-child) h3 {
-    padding-left: 0;
-    border-left: none;
-    margin-left: 0;
-    padding-top: 10px;
-  }
-
-  .checkbox-list label {
-    white-space: normal;
+  .demographic-groups {
+    grid-template-columns: 1fr;
+    gap: 18px;
   }
 
   .score-summary { grid-template-columns: 1fr; }

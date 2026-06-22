@@ -130,49 +130,59 @@ function updateScoreDisplay() {
   document.getElementById('score-my-empathy').textContent = MY_RESULT.empathy.toFixed(2);
 }
 
+function renderCategorySection(container, { key, title }) {
+  const section = document.createElement('div');
+  section.className = 'demographic-category';
+
+  const heading = document.createElement('h3');
+  heading.textContent = title;
+  section.appendChild(heading);
+
+  const list = document.createElement('ul');
+  list.className = 'checkbox-list';
+
+  DEMOGRAPHICS.filter((d) => d.category === key).forEach((d) => {
+    const li = document.createElement('li');
+    const id = `demo-${d.id}`;
+    li.innerHTML = `
+      <label for="${id}">
+        <input type="checkbox" id="${id}" value="${d.id}">
+        ${d.label}
+      </label>
+    `;
+    list.appendChild(li);
+
+    li.querySelector('input').addEventListener('change', (e) => {
+      if (e.target.checked) {
+        if (selectedDemographics.size >= 3) {
+          e.target.checked = false;
+          updateFilteredMessage('You can select up to three demographic groups at a time.');
+          return;
+        }
+        selectedDemographics.add(d.id);
+      } else {
+        selectedDemographics.delete(d.id);
+      }
+      updateFilteredMessage();
+      renderChart();
+    });
+  });
+
+  section.appendChild(list);
+  container.appendChild(section);
+}
+
 function renderDemographicFilters() {
   const container = document.getElementById('demographic-groups');
+  container.innerHTML = '';
 
-  DEMOGRAPHIC_CATEGORIES.forEach(({ key, title }) => {
-    const section = document.createElement('div');
-    section.className = 'demographic-category';
-
-    const heading = document.createElement('h3');
-    heading.textContent = title;
-    section.appendChild(heading);
-
-    const list = document.createElement('ul');
-    list.className = 'checkbox-list';
-
-    DEMOGRAPHICS.filter((d) => d.category === key).forEach((d) => {
-      const li = document.createElement('li');
-      const id = `demo-${d.id}`;
-      li.innerHTML = `
-        <label for="${id}">
-          <input type="checkbox" id="${id}" value="${d.id}">
-          ${d.label}
-        </label>
-      `;
-      list.appendChild(li);
-
-      li.querySelector('input').addEventListener('change', (e) => {
-        if (e.target.checked) {
-          if (selectedDemographics.size >= 3) {
-            e.target.checked = false;
-            updateFilteredMessage('You can select up to three demographic groups at a time.');
-            return;
-          }
-          selectedDemographics.add(d.id);
-        } else {
-          selectedDemographics.delete(d.id);
-        }
-        updateFilteredMessage();
-        renderChart();
-      });
+  DEMOGRAPHIC_COLUMNS.forEach((column) => {
+    const colEl = document.createElement('div');
+    colEl.className = 'demographic-column';
+    column.categories.forEach((category) => {
+      renderCategorySection(colEl, category);
     });
-
-    section.appendChild(list);
-    container.appendChild(section);
+    container.appendChild(colEl);
   });
 }
 
@@ -193,27 +203,45 @@ function updateFilteredMessage(override) {
     return DEMOGRAPHICS.find((d) => d.id === id).label;
   });
 
-  const avgSys = averageSelected('systemizing');
-  const avgEmp = averageSelected('empathy');
+  const { systemizing: avgSys, empathy: avgEmp, fromApi } = getSelectedAverage();
 
   let comparison = `My result: systemizing ${MY_RESULT.systemizing.toFixed(2)}, empathizing ${MY_RESULT.empathy.toFixed(2)}`;
   if (visitorResults) {
     comparison = `Your result: systemizing ${visitorResults.systemizing.toFixed(2)}, empathizing ${visitorResults.empathy.toFixed(2)} &nbsp;|&nbsp; ${comparison}`;
   }
 
+  const sourceNote = fromApi
+    ? 'YourMorals.org API average for this filter combination.'
+    : 'Estimated by averaging single-group values (exact combo not yet captured).';
+
   el.innerHTML = `
     <strong>Filtered comparison:</strong> ${labels.join(' + ')}<br>
     Average systemizing: <strong>${avgSys.toFixed(2)}</strong> &nbsp;|&nbsp;
     Average empathizing: <strong>${avgEmp.toFixed(2)}</strong>
+    <br><small>${sourceNote}</small>
     <br><small>${comparison}</small>
   `;
   el.classList.add('visible');
 }
 
-function averageSelected(field) {
-  const items = [...selectedDemographics].map((id) => DEMOGRAPHICS.find((d) => d.id === id));
-  const sum = items.reduce((acc, d) => acc + d[field], 0);
-  return sum / items.length;
+function getSelectedAverage() {
+  const ids = [...selectedDemographics].sort();
+  const categories = ids.map((id) => DEMOGRAPHICS.find((d) => d.id === id).category);
+  const uniqueCategories = new Set(categories);
+
+  if (ids.length >= 2 && uniqueCategories.size === ids.length) {
+    const combo = DEMOGRAPHIC_COMBOS[ids.join(',')];
+    if (combo) {
+      return { systemizing: combo.systemizing, empathy: combo.empathy, fromApi: true };
+    }
+  }
+
+  const items = ids.map((id) => DEMOGRAPHICS.find((d) => d.id === id));
+  return {
+    systemizing: items.reduce((acc, d) => acc + d.systemizing, 0) / items.length,
+    empathy: items.reduce((acc, d) => acc + d.empathy, 0) / items.length,
+    fromApi: false,
+  };
 }
 
 function initResults() {
