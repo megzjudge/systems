@@ -1,0 +1,180 @@
+// Demographic averages from YourMorals.org API (systems_feelings), captured 22 June 2026.
+
+const MY_RESULT = {
+  label: 'My Result',
+  systemizing: 3.3,
+  empathy: 2.95,
+  color: '#8b9a6b',
+};
+
+const YOUR_RESULT_COLOR = '#4a6fa5';
+
+const DEMOGRAPHICS = [
+  { id: 'male', label: 'Male', category: 'gender', color: '#7cb87c', systemizing: 2.84, empathy: 2.79 },
+  { id: 'female', label: 'Female', category: 'gender', color: '#e8a0b0', systemizing: 2.49, empathy: 3.05 },
+  { id: 'liberal', label: 'Liberal', category: 'political', color: '#8ecae6', systemizing: 2.65, empathy: 2.99 },
+  { id: 'conservative', label: 'Conservative', category: 'political', color: '#f4c4c4', systemizing: 2.73, empathy: 2.82 },
+  { id: 'moderate', label: 'Moderate', category: 'political', color: '#c4b0d8', systemizing: 2.68, empathy: 2.91 },
+  { id: 'hs', label: 'High school or less', category: 'education', color: '#5bc0be', systemizing: 2.56, empathy: 2.74 },
+  { id: 'bachelor', label: 'Bachelor or some college', category: 'education', color: '#90be6d', systemizing: 2.68, empathy: 2.88 },
+  { id: 'graduate', label: 'Graduate degree', category: 'education', color: '#577590', systemizing: 2.73, empathy: 2.98 },
+  { id: 'white', label: 'White or European American', category: 'race', color: '#d4c4e8', systemizing: 2.7, empathy: 2.91 },
+  { id: 'black', label: 'Black or African American', category: 'race', color: '#e8a090', systemizing: 2.59, empathy: 2.92 },
+  { id: 'hispanic', label: 'Hispanic or Latino/Latinx', category: 'race', color: '#d4b896', systemizing: 2.68, empathy: 2.87 },
+  { id: 'asian', label: 'Asian or Asian American', category: 'race', color: '#e8e4dc', systemizing: 2.69, empathy: 2.84 },
+  { id: 'age-18-29', label: '18–29', category: 'age', color: '#e8dcc8', systemizing: 2.59, empathy: 2.82 },
+  { id: 'age-30-44', label: '30–44', category: 'age', color: '#a8d0e8', systemizing: 2.69, empathy: 2.93 },
+  { id: 'age-45-64', label: '45–64', category: 'age', color: '#b8d8b0', systemizing: 2.74, empathy: 2.98 },
+  { id: 'age-65', label: '≥65', category: 'age', color: '#90b8d8', systemizing: 2.72, empathy: 3.02 },
+  { id: 'not-religious', label: 'Not religious', category: 'religiosity', color: '#b0b8c0', systemizing: 2.72, empathy: 2.88 },
+  { id: 'slightly', label: 'Slightly religious', category: 'religiosity', color: '#c8b8a8', systemizing: 2.66, empathy: 2.96 },
+  { id: 'moderately', label: 'Moderately religious', category: 'religiosity', color: '#b8a898', systemizing: 2.66, empathy: 2.97 },
+  { id: 'very-religious', label: 'Very religious', category: 'religiosity', color: '#a89888', systemizing: 2.66, empathy: 2.98 },
+];
+
+// Multi-filter averages from YourMorals API (key = sorted demographic ids).
+const DEMOGRAPHIC_COMBOS = {
+  'age-18-29,bachelor': { systemizing: 2.61, empathy: 2.85 },
+  'age-18-29,conservative': { systemizing: 2.64, empathy: 2.72 },
+  'age-18-29,female': { systemizing: 2.4, empathy: 2.96 },
+  'age-18-29,hs': { systemizing: 2.54, empathy: 2.74 },
+  'age-18-29,liberal': { systemizing: 2.54, empathy: 2.91 },
+  'age-18-29,male': { systemizing: 2.75, empathy: 2.7 },
+  'age-18-29,moderate': { systemizing: 2.58, empathy: 2.83 },
+  'age-18-29,white': { systemizing: 2.6, empathy: 2.82 },
+  'age-30-44,asian': { systemizing: 2.7, empathy: 2.91 },
+  'age-30-44,bachelor': { systemizing: 2.69, empathy: 2.9 },
+  'age-30-44,conservative': { systemizing: 2.75, empathy: 2.83 },
+  'age-30-44,female': { systemizing: 2.5, empathy: 3.07 },
+  'age-30-44,graduate': { systemizing: 2.7, empathy: 3.0 },
+  'age-30-44,liberal': { systemizing: 2.64, empathy: 2.99 },
+  'age-30-44,male': { systemizing: 2.84, empathy: 2.81 },
+  'age-30-44,moderate': { systemizing: 2.72, empathy: 2.92 },
+  'age-30-44,white': { systemizing: 2.69, empathy: 2.93 },
+  'age-45-64,bachelor': { systemizing: 2.76, empathy: 2.94 },
+  'age-45-64,conservative': { systemizing: 2.79, empathy: 2.91 },
+  'age-45-64,female': { systemizing: 2.53, empathy: 3.12 },
+  'age-45-64,graduate': { systemizing: 2.74, empathy: 3.02 },
+  'age-45-64,liberal': { systemizing: 2.71, empathy: 3.05 },
+  'age-45-64,male': { systemizing: 2.91, empathy: 2.88 },
+  'age-45-64,moderate': { systemizing: 2.75, empathy: 2.96 },
+  'age-45-64,moderately': { systemizing: 2.71, empathy: 3.03 },
+  'age-45-64,not-religious': { systemizing: 2.77, empathy: 2.96 },
+  'age-45-64,slightly': { systemizing: 2.72, empathy: 3.01 },
+  'age-45-64,very-religious': { systemizing: 2.7, empathy: 3.03 },
+  'age-45-64,white': { systemizing: 2.75, empathy: 2.98 },
+  'age-65,bachelor': { systemizing: 2.7, empathy: 3.0 },
+  'age-65,female': { systemizing: 2.52, empathy: 3.14 },
+  'age-65,graduate': { systemizing: 2.75, empathy: 3.04 },
+  'age-65,liberal': { systemizing: 2.69, empathy: 3.07 },
+  'age-65,male': { systemizing: 2.9, empathy: 2.91 },
+  'age-65,not-religious': { systemizing: 2.76, empathy: 2.99 },
+  'age-65,slightly': { systemizing: 2.7, empathy: 3.06 },
+  'age-65,white': { systemizing: 2.73, empathy: 3.02 },
+  'asian,bachelor': { systemizing: 2.67, empathy: 2.83 },
+  'asian,female': { systemizing: 2.5, empathy: 2.94 },
+  'asian,graduate': { systemizing: 2.75, empathy: 2.92 },
+  'asian,liberal': { systemizing: 2.65, empathy: 2.91 },
+  'asian,male': { systemizing: 2.84, empathy: 2.75 },
+  'asian,not-religious': { systemizing: 2.7, empathy: 2.83 },
+  'bachelor,female': { systemizing: 2.48, empathy: 3.02 },
+  'bachelor,conservative': { systemizing: 2.71, empathy: 2.81 },
+  'bachelor,hispanic': { systemizing: 2.69, empathy: 2.84 },
+  'bachelor,liberal': { systemizing: 2.64, empathy: 2.96 },
+  'bachelor,male': { systemizing: 2.84, empathy: 2.76 },
+  'bachelor,moderate': { systemizing: 2.67, empathy: 2.89 },
+  'bachelor,moderately': { systemizing: 2.66, empathy: 2.94 },
+  'bachelor,not-religious': { systemizing: 2.71, empathy: 2.86 },
+  'bachelor,slightly': { systemizing: 2.66, empathy: 2.93 },
+  'bachelor,very-religious': { systemizing: 2.62, empathy: 2.94 },
+  'bachelor,white': { systemizing: 2.7, empathy: 2.88 },
+  'conservative,female': { systemizing: 2.46, empathy: 3.0 },
+  'conservative,graduate': { systemizing: 2.81, empathy: 2.86 },
+  'conservative,male': { systemizing: 2.86, empathy: 2.73 },
+  'conservative,moderately': { systemizing: 2.75, empathy: 2.87 },
+  'conservative,not-religious': { systemizing: 2.81, empathy: 2.74 },
+  'conservative,slightly': { systemizing: 2.75, empathy: 2.83 },
+  'conservative,very-religious': { systemizing: 2.69, empathy: 2.91 },
+  'conservative,white': { systemizing: 2.76, empathy: 2.81 },
+  'female,graduate': { systemizing: 2.53, empathy: 3.12 },
+  'female,hs': { systemizing: 2.38, empathy: 2.89 },
+  'female,hispanic': { systemizing: 2.46, empathy: 2.98 },
+  'female,liberal': { systemizing: 2.49, empathy: 3.09 },
+  'female,moderate': { systemizing: 2.47, empathy: 3.04 },
+  'female,moderately': { systemizing: 2.46, empathy: 3.11 },
+  'female,not-religious': { systemizing: 2.52, empathy: 3.03 },
+  'female,slightly': { systemizing: 2.48, empathy: 3.08 },
+  'female,very-religious': { systemizing: 2.45, empathy: 3.11 },
+  'female,white': { systemizing: 2.5, empathy: 3.07 },
+  'graduate,liberal': { systemizing: 2.69, empathy: 3.05 },
+  'graduate,male': { systemizing: 2.89, empathy: 2.87 },
+  'graduate,moderate': { systemizing: 2.74, empathy: 2.98 },
+  'graduate,moderately': { systemizing: 2.69, empathy: 3.03 },
+  'graduate,not-religious': { systemizing: 2.76, empathy: 2.96 },
+  'graduate,slightly': { systemizing: 2.69, empathy: 3.04 },
+  'graduate,very-religious': { systemizing: 2.72, empathy: 3.04 },
+  'graduate,white': { systemizing: 2.74, empathy: 2.99 },
+  'hispanic,liberal': { systemizing: 2.66, empathy: 2.95 },
+  'hispanic,male': { systemizing: 2.84, empathy: 2.79 },
+  'hispanic,not-religious': { systemizing: 2.7, empathy: 2.85 },
+  'hs,liberal': { systemizing: 2.51, empathy: 2.81 },
+  'hs,male': { systemizing: 2.71, empathy: 2.62 },
+  'hs,moderate': { systemizing: 2.56, empathy: 2.78 },
+  'hs,not-religious': { systemizing: 2.6, empathy: 2.7 },
+  'hs,slightly': { systemizing: 2.51, empathy: 2.8 },
+  'hs,white': { systemizing: 2.57, empathy: 2.73 },
+  'liberal,male': { systemizing: 2.82, empathy: 2.87 },
+  'liberal,moderately': { systemizing: 2.6, empathy: 3.07 },
+  'liberal,not-religious': { systemizing: 2.68, empathy: 2.96 },
+  'liberal,slightly': { systemizing: 2.61, empathy: 3.05 },
+  'liberal,very-religious': { systemizing: 2.6, empathy: 3.07 },
+  'liberal,white': { systemizing: 2.66, empathy: 2.99 },
+  'male,moderate': { systemizing: 2.84, empathy: 2.82 },
+  'male,moderately': { systemizing: 2.85, empathy: 2.84 },
+  'male,not-religious': { systemizing: 2.86, empathy: 2.78 },
+  'male,slightly': { systemizing: 2.84, empathy: 2.85 },
+  'male,very-religious': { systemizing: 2.84, empathy: 2.87 },
+  'male,white': { systemizing: 2.86, empathy: 2.79 },
+  'moderate,moderately': { systemizing: 2.62, empathy: 3.0 },
+  'moderate,not-religious': { systemizing: 2.74, empathy: 2.85 },
+  'moderate,slightly': { systemizing: 2.68, empathy: 2.94 },
+  'moderate,very-religious': { systemizing: 2.62, empathy: 3.07 },
+  'moderate,white': { systemizing: 2.7, empathy: 2.92 },
+  'moderately,white': { systemizing: 2.68, empathy: 2.97 },
+  'not-religious,white': { systemizing: 2.72, empathy: 2.89 },
+  'slightly,white': { systemizing: 2.68, empathy: 2.97 },
+  'very-religious,white': { systemizing: 2.66, empathy: 2.98 },
+};
+
+const DEMOGRAPHIC_COLUMNS = [
+  {
+    categories: [
+      { key: 'gender', title: 'Gender' },
+      { key: 'age', title: 'Age' },
+      { key: 'religiosity', title: 'Religiosity' },
+    ],
+  },
+  {
+    categories: [
+      { key: 'political', title: 'Political Ideology' },
+      { key: 'education', title: 'Education' },
+      { key: 'race', title: 'Race' },
+    ],
+  },
+];
+
+function saveVisitorResults(systemizing, empathy) {
+  localStorage.setItem('sf-visitor-results', JSON.stringify({ systemizing, empathy }));
+}
+
+function loadVisitorResults() {
+  try {
+    const raw = localStorage.getItem('sf-visitor-results');
+    if (raw) return JSON.parse(raw);
+  } catch (_) { /* ignore */ }
+  return null;
+}
+
+function clearVisitorResults() {
+  localStorage.removeItem('sf-visitor-results');
+}
