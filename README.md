@@ -1,6 +1,6 @@
 # Systems & Feelings Survey
 
-Interactive visualization of empathizing and systemizing scores, inspired by [YourMorals.org](https://yourmorals.org/). Compare your results to demographic averages from the official survey API.
+Interactive visualization of empathizing and systemizing scores, sourced from [YourMorals.org](https://yourmorals.org/).
 
 **Live site:** [systems-feelings-survey.jdge.cc](https://systems-feelings-survey.jdge.cc/)
 
