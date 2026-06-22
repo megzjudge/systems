@@ -1,0 +1,37 @@
+{
+  "headers": [
+    "Recipe Name",
+    "Meats",
+    "Vegetables",
+    "Fillers",
+    "Spices",
+    "Condiments",
+    "Other",
+    "Instructions",
+    "Notes"
+  ],
+  "data": [
+    {
+      "Recipe Name": "Protein Bars",
+      "Meats": "",
+      "Vegetables": "",
+      "Fillers": "Banana, Banana, 250g Peanut Butter, 75g Chia Seeds, 200g Powder{Protein Powder|Flour}, Dates",
+      "Spices": "",
+      "Condiments": "40g Maple Syrup",
+      "Other": "Dark Chocolate",
+      "Instructions": "Mix 2 bananas, 250g peanut butter, 75g milled chia seeds, 200g powder (protein powder, flour, or similar), 40g maple syrup, and dates.\n\nPut the mixture in baking paper inside a freezer-safe container and smoosh down to compact.\n\nAdd hot water to the dates and smoosh into a paste. Spread a layer of the date mixture on top.\n\nFreeze for 1 hour.\n\nMelt dark chocolate in a bowl over a pan on the stove and spread on top.\n\nFreeze for 1 hour.\n\nStore in the fridge or freezer as wanted.",
+      "Notes": "Source: https://www.youtube.com/watch?v=rj3rAEoHqBk"
+    },
+    {
+      "Recipe Name": "Winter Stew",
+      "Meats": "",
+      "Vegetables": "Root Vegetables",
+      "Fillers": "",
+      "Spices": "Cayenne Pepper, Garlic, Salt",
+      "Condiments": "Worcestershire Sauce, Vegetable Stock",
+      "Other": "",
+      "Instructions": "Cut up vegetables.\n\nPan fry vegetables.\n\nAdd condiments to water.\n\nPut fried vegetables into water.\n\nSimmer in pot for ages.",
+      "Notes": "Source: https://www.youtube.com/watch?v=rJFL0UU92YM | https://www.youtube.com/watch?v=TYwv4ACc4iA"
+    }
+  ]
+}
