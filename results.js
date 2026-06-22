@@ -4,8 +4,9 @@ const selectedDemographics = new Set();
 let showPersonalOnly = false;
 let massPreset = null;
 let massPresetBars = null;
-let colorViewKey = '';
-let colorRotation = 0;
+const barColorMap = new Map();
+let visitorColor = null;
+let visitorColorIndex = -1;
 
 function hslToHex(h, s, l) {
   s /= 100;
@@ -26,42 +27,69 @@ const COLOR_POOL = Array.from({ length: 160 }, (_, i) => {
   return hslToHex(hue, sat, light);
 });
 
-function assignBarColors(groups) {
-  const rotatable = groups.filter((g) => g.label !== MY_RESULT.label);
-  const key = rotatable.map((g) => g.label).sort().join('|');
+function initBarColors() {
+  barColorMap.clear();
+  barColorMap.set(MY_RESULT.label, MY_RESULT.color);
 
-  if (key !== colorViewKey) {
-    colorViewKey = key;
-    colorRotation = (colorRotation + 11) % COLOR_POOL.length;
+  const labels = new Set([
+    'Your Result',
+    ...DEMOGRAPHICS.map((d) => d.label),
+    ...Object.keys(DEMOGRAPHIC_COMBOS).map(labelForComboKey),
+  ]);
+
+  const shuffled = [...COLOR_POOL];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
 
-  const pool = [...COLOR_POOL.slice(colorRotation), ...COLOR_POOL.slice(0, colorRotation)];
   const used = new Set([MY_RESULT.color]);
   let poolIndex = 0;
 
-  const nextColor = () => {
-    while (poolIndex < pool.length) {
-      const color = pool[poolIndex++];
-      if (color !== MY_RESULT.color && !used.has(color)) {
-        used.add(color);
-        return color;
-      }
-    }
-    let hue = (colorRotation * 13 + used.size * 47) % 360;
-    while (used.has(hslToHex(hue, 55, 60))) {
-      hue = (hue + 23) % 360;
-    }
-    const fallback = hslToHex(hue, 55, 60);
-    used.add(fallback);
-    return fallback;
-  };
+  labels.forEach((label) => {
+    if (label === MY_RESULT.label) return;
 
+    let color = shuffled[poolIndex++];
+    while ((color === MY_RESULT.color || used.has(color)) && poolIndex < shuffled.length) {
+      color = shuffled[poolIndex++];
+    }
+    if (color === MY_RESULT.color || used.has(color)) {
+      let hue = (used.size * 47 + 17) % 360;
+      while (used.has(hslToHex(hue, 55, 60))) {
+        hue = (hue + 23) % 360;
+      }
+      color = hslToHex(hue, 55, 60);
+    }
+
+    barColorMap.set(label, color);
+    used.add(color);
+  });
+}
+
+function assignBarColors(groups) {
   return groups.map((g) => {
     if (g.label === MY_RESULT.label) {
       return { ...g, color: MY_RESULT.color };
     }
-    return { ...g, color: nextColor() };
+    if (g.label === 'Your Result' && visitorColor) {
+      return { ...g, color: visitorColor };
+    }
+    return { ...g, color: barColorMap.get(g.label) || MY_RESULT.color };
   });
+}
+
+function cycleVisitorColor() {
+  if (!visitorResults) return;
+  do {
+    visitorColorIndex = (visitorColorIndex + 1) % COLOR_POOL.length;
+    visitorColor = COLOR_POOL[visitorColorIndex];
+  } while (visitorColor === MY_RESULT.color);
+  renderChart();
+}
+
+function resetVisitorColor() {
+  visitorColor = null;
+  visitorColorIndex = -1;
 }
 
 function clearMassPreset() {
@@ -256,17 +284,20 @@ function updateScoreDisplay() {
   const visitorSys = document.getElementById('score-visitor-systemizing');
   const visitorEmp = document.getElementById('score-visitor-empathy');
   const visitorCard = document.getElementById('visitor-score-card');
+  const changeColourBtn = document.getElementById('change-colour-btn');
 
   if (visitorResults) {
     visitorSys.textContent = visitorResults.systemizing.toFixed(2);
     visitorEmp.textContent = visitorResults.empathy.toFixed(2);
     visitorCard.classList.add('has-data');
+    changeColourBtn.hidden = false;
     document.getElementById('input-systemizing').value = visitorResults.systemizing;
     document.getElementById('input-empathy').value = visitorResults.empathy;
   } else {
     visitorSys.textContent = '—';
     visitorEmp.textContent = '—';
     visitorCard.classList.remove('has-data');
+    changeColourBtn.hidden = true;
     document.getElementById('input-systemizing').value = '';
     document.getElementById('input-empathy').value = '';
   }
@@ -530,7 +561,6 @@ function getSelectedAverage() {
 
 function initResults() {
   visitorResults = loadVisitorResults();
-  updateScoreDisplay();
 
   document.getElementById('score-form').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -544,6 +574,10 @@ function initResults() {
 
     visitorResults = { systemizing, empathy };
     saveVisitorResults(systemizing, empathy);
+    if (!visitorColor) {
+      visitorColor = barColorMap.get('Your Result');
+      visitorColorIndex = COLOR_POOL.indexOf(visitorColor);
+    }
     updateScoreDisplay();
     renderChart();
     updateFilteredMessage();
@@ -551,6 +585,7 @@ function initResults() {
 
   document.getElementById('clear-results-btn').addEventListener('click', () => {
     visitorResults = null;
+    resetVisitorColor();
     clearVisitorResults();
     updateScoreDisplay();
     renderChart();
@@ -559,12 +594,19 @@ function initResults() {
 
   document.getElementById('clear-demographics-btn').addEventListener('click', clearDemographics);
   document.getElementById('reset-chart-btn').addEventListener('click', resetToDefaultChart);
+  document.getElementById('change-colour-btn').addEventListener('click', cycleVisitorColor);
 
   document.querySelectorAll('.mass-preset-btn').forEach((btn) => {
     btn.addEventListener('click', () => applyMassPreset(btn.dataset.preset));
   });
 
   renderDemographicFilters();
+  initBarColors();
+  if (visitorResults) {
+    visitorColor = barColorMap.get('Your Result');
+    visitorColorIndex = COLOR_POOL.indexOf(visitorColor);
+  }
+  updateScoreDisplay();
   renderChart();
 }
 
