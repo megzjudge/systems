@@ -20,12 +20,74 @@ function hslToHex(h, s, l) {
   return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
 }
 
-const COLOR_POOL = Array.from({ length: 160 }, (_, i) => {
-  const hue = (i * 137.508 + 17) % 360;
-  const sat = 48 + (i % 5) * 4;
-  const light = 54 + (i % 4) * 5;
-  return hslToHex(hue, sat, light);
-});
+function hexToHsl(hex) {
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  if (max === min) return [0, 0, l * 100];
+  const d = max - min;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  let h;
+  switch (max) {
+    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+    case g: h = (b - r) / d + 2; break;
+    default: h = (r - g) / d + 4;
+  }
+  return [h * 60, s * 100, l * 100];
+}
+
+function colorDistance(hex1, hex2) {
+  const [h1, s1, l1] = hexToHsl(hex1);
+  const [h2, s2, l2] = hexToHsl(hex2);
+  const dh = Math.min(Math.abs(h1 - h2), 360 - Math.abs(h1 - h2)) / 90;
+  const ds = Math.abs(s1 - s2) / 50;
+  const dl = Math.abs(l1 - l2) / 35;
+  return Math.sqrt(dh * dh + ds * ds + dl * dl);
+}
+
+function isDistinctEnough(candidate, usedColors, minDistance = 0.85) {
+  return [...usedColors].every((used) => colorDistance(candidate, used) >= minDistance);
+}
+
+function generateDiverseColorPool(size) {
+  const satLevels = [78, 62, 72, 55, 68, 58];
+  const lightLevels = [42, 62, 48, 68, 38, 55, 72, 45];
+  const colors = [];
+
+  for (let i = 0; i < size; i++) {
+    const hue = (i * 360) / size;
+    const sat = satLevels[i % satLevels.length];
+    const light = lightLevels[Math.floor(i / 3) % lightLevels.length];
+    colors.push(hslToHex(hue, sat, light));
+  }
+
+  return colors;
+}
+
+const COLOR_POOL = generateDiverseColorPool(160);
+
+function pickDistinctColor(usedColors) {
+  for (const color of COLOR_POOL) {
+    if (color === MY_RESULT.color) continue;
+    if (isDistinctEnough(color, usedColors)) return color;
+  }
+
+  for (let hue = 0; hue < 360; hue += 13) {
+    for (const sat of [75, 60]) {
+      for (const light of [42, 58, 68]) {
+        const color = hslToHex(hue, sat, light);
+        if (color !== MY_RESULT.color && isDistinctEnough(color, usedColors, 0.75)) {
+          return color;
+        }
+      }
+    }
+  }
+
+  return hslToHex((usedColors.size * 47) % 360, 70, 50);
+}
 
 function initBarColors() {
   barColorMap.clear();
@@ -44,22 +106,12 @@ function initBarColors() {
   }
 
   const used = new Set([MY_RESULT.color]);
-  let poolIndex = 0;
 
   labels.forEach((label) => {
     if (label === MY_RESULT.label) return;
 
-    let color = shuffled[poolIndex++];
-    while ((color === MY_RESULT.color || used.has(color)) && poolIndex < shuffled.length) {
-      color = shuffled[poolIndex++];
-    }
-    if (color === MY_RESULT.color || used.has(color)) {
-      let hue = (used.size * 47 + 17) % 360;
-      while (used.has(hslToHex(hue, 55, 60))) {
-        hue = (hue + 23) % 360;
-      }
-      color = hslToHex(hue, 55, 60);
-    }
+    let color = shuffled.find((c) => c !== MY_RESULT.color && isDistinctEnough(c, used));
+    if (!color) color = pickDistinctColor(used);
 
     barColorMap.set(label, color);
     used.add(color);
@@ -80,10 +132,23 @@ function assignBarColors(groups) {
 
 function cycleVisitorColor() {
   if (!visitorResults) return;
+  const used = new Set([MY_RESULT.color]);
+  barColorMap.forEach((color, label) => {
+    if (label !== 'Your Result') used.add(color);
+  });
+
+  let attempts = 0;
   do {
     visitorColorIndex = (visitorColorIndex + 1) % COLOR_POOL.length;
     visitorColor = COLOR_POOL[visitorColorIndex];
-  } while (visitorColor === MY_RESULT.color);
+    attempts++;
+  } while (
+    (visitorColor === MY_RESULT.color || !isDistinctEnough(visitorColor, used, 0.7))
+    && attempts < COLOR_POOL.length
+  );
+  if (!isDistinctEnough(visitorColor, used, 0.7)) {
+    visitorColor = pickDistinctColor(used);
+  }
   renderChart();
 }
 

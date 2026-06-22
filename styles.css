@@ -392,14 +392,17 @@ a:hover { color: var(--accent-hover); }
 }
 
 .score-entry-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
   gap: 12px;
   width: 100%;
 }
 
 .score-entry-actions .btn {
-  width: 100%;
+  width: auto;
 }
 
 .score-input-group {
@@ -826,8 +829,7 @@ a:hover { color: var(--accent-hover); }
 
   .score-entry-section { padding: 22px 16px; }
 
-  .score-entry-fields,
-  .score-entry-actions {
+  .score-entry-fields {
     grid-template-columns: 1fr;
   }
 
