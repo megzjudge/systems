@@ -4,6 +4,7 @@ const selectedDemographics = new Set();
 let showPersonalOnly = false;
 let massPreset = null;
 let massPresetBars = null;
+let selectedCombo = null;
 const barColorMap = new Map();
 const demographicColorById = new Map();
 let visitorColor = null;
@@ -160,6 +161,13 @@ function resetVisitorColor() {
   visitorHue = Math.floor(Math.random() * 360);
 }
 
+function clearComboSelection() {
+  selectedCombo = null;
+  document.querySelectorAll('.combo-item-btn.active').forEach((btn) => {
+    btn.classList.remove('active');
+  });
+}
+
 function clearMassPreset() {
   massPreset = null;
   massPresetBars = null;
@@ -201,6 +209,7 @@ function applyMassPreset(preset) {
   massPresetBars = sorted.slice(0, 10);
   showPersonalOnly = false;
   selectedDemographics.clear();
+  clearComboSelection();
 
   document.querySelectorAll('.checkbox-list input[type="checkbox"]').forEach((input) => {
     input.checked = false;
@@ -240,6 +249,15 @@ function getVisibleDemographics() {
     return [...personal, ...massPresetBars];
   }
 
+  if (selectedCombo && DEMOGRAPHIC_COMBOS[selectedCombo]) {
+    const combo = DEMOGRAPHIC_COMBOS[selectedCombo];
+    return [...personal, {
+      label: labelForComboKey(selectedCombo),
+      systemizing: combo.systemizing,
+      empathy: combo.empathy,
+    }];
+  }
+
   const checked = DEMOGRAPHICS.filter((d) => selectedDemographics.has(d.id));
 
   if (checked.length > 0) {
@@ -255,6 +273,7 @@ function getVisibleDemographics() {
 
 function resetToDefaultChart() {
   selectedDemographics.clear();
+  clearComboSelection();
   showPersonalOnly = false;
   clearMassPreset();
   document.querySelectorAll('.checkbox-list input[type="checkbox"]').forEach((input) => {
@@ -266,6 +285,7 @@ function resetToDefaultChart() {
 
 function clearDemographics() {
   selectedDemographics.clear();
+  clearComboSelection();
   showPersonalOnly = true;
   clearMassPreset();
   document.querySelectorAll('.checkbox-list input[type="checkbox"]').forEach((input) => {
@@ -387,104 +407,124 @@ function getComboStatus(key) {
   return 'missing';
 }
 
-function getCombosForCategory(categoryKey) {
+function getCombosGroupedByCategory(categoryKey) {
   const inCategory = DEMOGRAPHICS.filter((d) => d.category === categoryKey);
   const otherCategories = [...new Set(
     DEMOGRAPHICS.filter((d) => d.category !== categoryKey).map((d) => d.category),
   )];
 
-  const combos = [];
-  inCategory.forEach((d1) => {
+  return inCategory.map((anchor) => {
+    const combos = [];
     otherCategories.forEach((otherKey) => {
-      DEMOGRAPHICS.filter((d) => d.category === otherKey).forEach((d2) => {
-        const ids = [d1.id, d2.id].sort();
+      DEMOGRAPHICS.filter((d) => d.category === otherKey).forEach((partner) => {
+        const ids = [anchor.id, partner.id].sort();
         const key = ids.join(',');
         const api = DEMOGRAPHIC_COMBOS[key];
-        const status = getComboStatus(key);
         combos.push({
           key,
           ids,
-          label: `${d1.label} + ${d2.label}`,
+          partnerLabel: partner.label,
+          label: `${anchor.label} + ${partner.label}`,
           systemizing: api?.systemizing,
           empathy: api?.empathy,
-          status,
+          status: getComboStatus(key),
         });
       });
     });
+    combos.sort((a, b) => a.partnerLabel.localeCompare(b.partnerLabel));
+    return { anchor, combos };
   });
-
-  return combos.sort((a, b) => a.label.localeCompare(b.label));
 }
 
-function applyComboSelection(ids) {
+function applyComboSelection(combo) {
   selectedDemographics.clear();
   showPersonalOnly = false;
   clearMassPreset();
-  ids.forEach((id) => selectedDemographics.add(id));
+  selectedCombo = combo.key;
 
   document.querySelectorAll('.checkbox-list input[type="checkbox"]').forEach((input) => {
-    input.checked = selectedDemographics.has(input.value);
+    input.checked = false;
   });
+  document.querySelectorAll('.combo-item-btn.active').forEach((btn) => {
+    btn.classList.remove('active');
+  });
+  document.querySelector(`.combo-item-btn[data-combo-key="${combo.key}"]`)?.classList.add('active');
 
   updateFilteredMessage();
   renderChart();
 }
 
 function renderComboPanel(section, categoryKey) {
-  const combos = getCombosForCategory(categoryKey);
-  const captured = combos.filter((c) => c.status === 'captured').length;
+  const grouped = getCombosGroupedByCategory(categoryKey);
+  const allCombos = grouped.flatMap((g) => g.combos);
+  const captured = allCombos.filter((c) => c.status === 'captured').length;
 
   const toggle = document.createElement('button');
   toggle.type = 'button';
   toggle.className = 'combo-toggle';
-  toggle.textContent = `Show all combos (${captured}/${combos.length})`;
+  toggle.textContent = `Show all combos (${captured}/${allCombos.length})`;
 
   const panel = document.createElement('div');
   panel.className = 'combo-panel';
   panel.hidden = true;
 
-  const list = document.createElement('ul');
-  list.className = 'combo-list';
+  const columns = document.createElement('div');
+  columns.className = 'combo-columns';
 
   const statusLabels = {
-    no_data: 'no data available',
+    no_data: 'no data',
     not_enough: 'not enough data',
     missing: 'not captured',
   };
 
-  combos.forEach((combo) => {
-    const li = document.createElement('li');
-    li.className = `combo-item ${combo.status}`;
+  grouped.forEach(({ anchor, combos }) => {
+    const col = document.createElement('div');
+    col.className = 'combo-column';
 
-    if (combo.status === 'captured') {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'combo-item-btn';
-      btn.innerHTML = `
-        <span class="combo-item-label">${combo.label}</span>
-        <span class="combo-item-scores">Sys ${combo.systemizing.toFixed(2)} · Emp ${combo.empathy.toFixed(2)}</span>
-      `;
-      btn.addEventListener('click', () => applyComboSelection(combo.ids));
-      li.appendChild(btn);
-    } else {
-      li.innerHTML = `
-        <span class="combo-item-label">${combo.label}</span>
-        <span class="combo-item-status">${statusLabels[combo.status]}</span>
-      `;
-    }
+    const header = document.createElement('div');
+    header.className = 'combo-column-header';
+    header.textContent = `${anchor.label} +`;
+    col.appendChild(header);
 
-    list.appendChild(li);
+    const list = document.createElement('ul');
+    list.className = 'combo-list';
+
+    combos.forEach((combo) => {
+      const li = document.createElement('li');
+      li.className = `combo-item ${combo.status}`;
+
+      if (combo.status === 'captured') {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'combo-item-btn';
+        btn.dataset.comboKey = combo.key;
+        if (selectedCombo === combo.key) btn.classList.add('active');
+        btn.textContent = combo.partnerLabel;
+        btn.addEventListener('click', () => applyComboSelection(combo));
+        li.appendChild(btn);
+      } else {
+        li.innerHTML = `
+          <span class="combo-item-label">${combo.partnerLabel}</span>
+          <span class="combo-item-status">${statusLabels[combo.status]}</span>
+        `;
+      }
+
+      list.appendChild(li);
+    });
+
+    col.appendChild(list);
+    columns.appendChild(col);
   });
 
-  panel.appendChild(list);
+  panel.appendChild(columns);
 
   toggle.addEventListener('click', () => {
     const open = panel.hidden;
     panel.hidden = !open;
     section.classList.toggle('combos-open', open);
     toggle.textContent = open
-      ? `Hide combos (${captured}/${combos.length})`
-      : `Show all combos (${captured}/${combos.length})`;
+      ? `Hide combos (${captured}/${allCombos.length})`
+      : `Show all combos (${captured}/${allCombos.length})`;
   });
 
   section.appendChild(toggle);
@@ -517,6 +557,7 @@ function renderCategorySection(container, { key, title }) {
       if (e.target.checked) {
         showPersonalOnly = false;
         clearMassPreset();
+        clearComboSelection();
 
         DEMOGRAPHICS.filter((item) => item.category === d.category && item.id !== d.id).forEach((item) => {
           selectedDemographics.delete(item.id);
@@ -534,6 +575,7 @@ function renderCategorySection(container, { key, title }) {
         selectedDemographics.delete(d.id);
       }
       clearMassPreset();
+      clearComboSelection();
       updateFilteredMessage();
       renderChart();
     });
@@ -569,6 +611,34 @@ function updateFilteredMessage(override) {
   if (massPreset) {
     const list = massPresetBars.map((g) => `${g.label} (${g.systemizing.toFixed(2)} / ${g.empathy.toFixed(2)})`).join('<br>');
     el.innerHTML = `<strong>${MASS_PRESET_LABELS[massPreset]}</strong><br><small>${list}</small>`;
+    el.classList.add('visible');
+    return;
+  }
+
+  if (selectedCombo) {
+    const label = labelForComboKey(selectedCombo);
+    const { systemizing: avgSys, empathy: avgEmp, fromApi, unavailable } = getSelectedAverage();
+
+    let comparison = `My result: systemizing ${MY_RESULT.systemizing.toFixed(2)}, empathizing ${MY_RESULT.empathy.toFixed(2)}`;
+    if (visitorResults) {
+      comparison = `Your result: systemizing ${visitorResults.systemizing.toFixed(2)}, empathizing ${visitorResults.empathy.toFixed(2)} &nbsp;|&nbsp; ${comparison}`;
+    }
+
+    const sourceNote = fromApi
+      ? 'YourMorals.org API average for this filter combination.'
+      : 'Estimated by averaging single-group values (exact combo not yet captured).';
+
+    const averagesBlock = unavailable
+      ? ''
+      : `Average systemizing: <strong>${avgSys.toFixed(2)}</strong> &nbsp;|&nbsp;
+      Average empathizing: <strong>${avgEmp.toFixed(2)}</strong><br>`;
+
+    el.innerHTML = `
+      <strong>Filtered comparison:</strong> ${label}<br>
+      ${averagesBlock}
+      <small>${sourceNote}</small>
+      <br><small>${comparison}</small>
+    `;
     el.classList.add('visible');
     return;
   }
@@ -615,6 +685,17 @@ function updateFilteredMessage(override) {
 }
 
 function getSelectedAverage() {
+  if (selectedCombo) {
+    const status = getComboStatus(selectedCombo);
+    if (status === 'no_data' || status === 'not_enough') {
+      return { systemizing: null, empathy: null, fromApi: false, unavailable: status };
+    }
+    const combo = DEMOGRAPHIC_COMBOS[selectedCombo];
+    if (combo) {
+      return { systemizing: combo.systemizing, empathy: combo.empathy, fromApi: true, unavailable: null };
+    }
+  }
+
   const ids = [...selectedDemographics].sort();
   const categories = ids.map((id) => DEMOGRAPHICS.find((d) => d.id === id).category);
   const uniqueCategories = new Set(categories);
