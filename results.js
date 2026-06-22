@@ -132,23 +132,11 @@ function assignBarColors(groups) {
 
 function cycleVisitorColor() {
   if (!visitorResults) return;
-  const used = new Set([MY_RESULT.color]);
-  barColorMap.forEach((color, label) => {
-    if (label !== 'Your Result') used.add(color);
-  });
-
-  let attempts = 0;
+  const previous = visitorColor;
   do {
     visitorColorIndex = (visitorColorIndex + 1) % COLOR_POOL.length;
     visitorColor = COLOR_POOL[visitorColorIndex];
-    attempts++;
-  } while (
-    (visitorColor === MY_RESULT.color || !isDistinctEnough(visitorColor, used, 0.7))
-    && attempts < COLOR_POOL.length
-  );
-  if (!isDistinctEnough(visitorColor, used, 0.7)) {
-    visitorColor = pickDistinctColor(used);
-  }
+  } while (visitorColor === MY_RESULT.color || visitorColor === previous);
   renderChart();
 }
 
@@ -508,9 +496,16 @@ function renderCategorySection(container, { key, title }) {
       if (e.target.checked) {
         showPersonalOnly = false;
         clearMassPreset();
+
+        DEMOGRAPHICS.filter((item) => item.category === d.category && item.id !== d.id).forEach((item) => {
+          selectedDemographics.delete(item.id);
+          const otherInput = document.getElementById(`demo-${item.id}`);
+          if (otherInput) otherInput.checked = false;
+        });
+
         if (selectedDemographics.size >= 3) {
           e.target.checked = false;
-          updateFilteredMessage('You can select up to three demographic groups at a time.');
+          updateFilteredMessage('You can select up to three groups — one per category.');
           return;
         }
         selectedDemographics.add(d.id);
