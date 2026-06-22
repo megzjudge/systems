@@ -99,6 +99,16 @@
 
       <div class="demographic-groups" id="demographic-groups"></div>
 
+      <div class="demographic-actions">
+        <div class="mass-presets">
+          <button type="button" class="btn btn-secondary mass-preset-btn" data-preset="low-empathy">Lowest empathy</button>
+          <button type="button" class="btn btn-secondary mass-preset-btn" data-preset="high-empathy">Highest empathy</button>
+          <button type="button" class="btn btn-secondary mass-preset-btn" data-preset="low-systemizing">Lowest systemizing</button>
+          <button type="button" class="btn btn-secondary mass-preset-btn" data-preset="high-systemizing">Highest systemizing</button>
+        </div>
+        <button type="button" class="btn btn-secondary" id="clear-demographics-btn">Clear demographics</button>
+      </div>
+
       <p class="selection-hint">
         Demographic averages from YourMorals.org API, captured 22 June 2026. For live comparisons, use the official
         results page at <a href="https://www.yourmorals.org/" target="_blank" rel="noopener">yourmorals.org</a>.
@@ -106,10 +116,6 @@
 
       <div class="filtered-result" id="filtered-result"></div>
     </section>
-
-    <div style="text-align: center; padding-bottom: 48px;">
-      <a href="https://www.yourmorals.org/" class="btn btn-secondary" target="_blank" rel="noopener">Back to Official Survey ↗</a>
-    </div>
   </main>
 
   <footer class="site-footer">

@@ -8,6 +8,14 @@ const MY_RESULT = {
 };
 
 const YOUR_RESULT_COLOR = '#4a6fa5';
+const COMBO_BAR_COLOR = '#b0b8c4';
+
+const MASS_PRESET_LABELS = {
+  'low-empathy': 'Lowest 10 empathizing (singles + combos)',
+  'high-empathy': 'Highest 10 empathizing (singles + combos)',
+  'low-systemizing': 'Lowest 10 systemizing (singles + combos)',
+  'high-systemizing': 'Highest 10 systemizing (singles + combos)',
+};
 
 const DEMOGRAPHICS = [
   { id: 'male', label: 'Male', category: 'gender', color: '#7cb87c', systemizing: 2.84, empathy: 2.79 },
@@ -41,6 +49,9 @@ const DEMOGRAPHIC_COMBOS = {
   'age-18-29,liberal': { systemizing: 2.54, empathy: 2.91 },
   'age-18-29,male': { systemizing: 2.75, empathy: 2.7 },
   'age-18-29,moderate': { systemizing: 2.58, empathy: 2.83 },
+  'age-18-29,moderately': { systemizing: 2.6, empathy: 2.89 },
+  'age-18-29,not-religious': { systemizing: 2.61, empathy: 2.8 },
+  'age-18-29,slightly': { systemizing: 2.59, empathy: 2.83 },
   'age-18-29,white': { systemizing: 2.6, empathy: 2.82 },
   'age-30-44,asian': { systemizing: 2.7, empathy: 2.91 },
   'age-30-44,bachelor': { systemizing: 2.69, empathy: 2.9 },
@@ -50,6 +61,10 @@ const DEMOGRAPHIC_COMBOS = {
   'age-30-44,liberal': { systemizing: 2.64, empathy: 2.99 },
   'age-30-44,male': { systemizing: 2.84, empathy: 2.81 },
   'age-30-44,moderate': { systemizing: 2.72, empathy: 2.92 },
+  'age-30-44,moderately': { systemizing: 2.67, empathy: 2.96 },
+  'age-30-44,not-religious': { systemizing: 2.7, empathy: 2.89 },
+  'age-30-44,slightly': { systemizing: 2.67, empathy: 2.98 },
+  'age-30-44,very-religious': { systemizing: 2.67, empathy: 3.0 },
   'age-30-44,white': { systemizing: 2.69, empathy: 2.93 },
   'age-45-64,bachelor': { systemizing: 2.76, empathy: 2.94 },
   'age-45-64,conservative': { systemizing: 2.79, empathy: 2.91 },
@@ -145,6 +160,61 @@ const DEMOGRAPHIC_COMBOS = {
   'slightly,white': { systemizing: 2.68, empathy: 2.97 },
   'very-religious,white': { systemizing: 2.66, empathy: 2.98 },
 };
+
+// YourMorals returns empty 404 — "No data available" on the official site.
+const DEMOGRAPHIC_NO_DATA = new Set([
+  'age-18-29,asian',
+  'age-18-29,black',
+  'age-18-29,graduate',
+  'age-18-29,hispanic',
+  'age-18-29,very-religious',
+  'age-30-44,black',
+  'age-30-44,hispanic',
+  'age-30-44,hs',
+  'age-45-64,asian',
+  'age-45-64,black',
+  'age-45-64,hispanic',
+  'age-45-64,hs',
+  'age-65,asian',
+  'age-65,black',
+  'age-65,conservative',
+  'age-65,hispanic',
+  'age-65,hs',
+  'age-65,moderately',
+  'age-65,moderate',
+  'age-65,very-religious',
+  'asian,conservative',
+  'asian,hs',
+  'asian,moderate',
+  'asian,moderately',
+  'asian,slightly',
+  'asian,very-religious',
+  'bachelor,black',
+  'black,conservative',
+  'black,female',
+  'black,graduate',
+  'black,hs',
+  'black,liberal',
+  'black,male',
+  'black,moderate',
+  'black,moderately',
+  'black,not-religious',
+  'black,slightly',
+  'black,very-religious',
+  'conservative,hs',
+  'conservative,hispanic',
+  'graduate,hispanic',
+  'hispanic,hs',
+  'hispanic,moderate',
+  'hispanic,moderately',
+  'hispanic,slightly',
+  'hispanic,very-religious',
+  'hs,moderately',
+  'hs,very-religious',
+]);
+
+// YourMorals returns 404 with message "Not enough data" (sample too small).
+const DEMOGRAPHIC_NOT_ENOUGH = new Set([]);
 
 const DEMOGRAPHIC_COLUMNS = [
   {

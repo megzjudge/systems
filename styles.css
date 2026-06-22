@@ -577,6 +577,25 @@ a:hover { color: var(--accent-hover); }
   align-items: start;
 }
 
+.demographic-actions {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mass-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mass-preset-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-light);
+}
+
 .demographic-column {
   display: flex;
   flex-direction: column;
@@ -698,13 +717,23 @@ a:hover { color: var(--accent-hover); }
   font-variant-numeric: tabular-nums;
 }
 
-.combo-item.missing {
+.combo-item.missing,
+.combo-item.no_data,
+.combo-item.not_enough {
   color: var(--muted);
 }
 
-.combo-item-missing {
+.combo-item-status {
   font-style: italic;
   white-space: nowrap;
+}
+
+.combo-item.no_data .combo-item-status {
+  color: #9a7a5a;
+}
+
+.combo-item.not_enough .combo-item-status {
+  color: #8a7a9a;
 }
 
 .selection-hint {
