@@ -9,7 +9,7 @@ YourMorals.org shows you your own scores after you take the survey, but doesn't 
 - `index.html` explains the empathizing/systemizing framework and links out to the official survey.
 - `results.html` is the interactive tool: enter your own scores, compare them against a pre-set baseline result and demographic averages, filter by group, and explore two-way group combinations — all rendered as a grouped bar chart.
 
-No backend, build step, or package manager is involved — everything is static HTML/CSS/JS with the demographic data baked into `data.js` at build time (i.e. when it was collected), not fetched live.
+The site is static HTML/CSS/JS with the demographic data baked into `data.js` at build time (i.e. when it was collected), not fetched live.
 
 ## How it works
 
