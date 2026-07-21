@@ -9,8 +9,6 @@ YourMorals.org shows you your own scores after you take the survey, but doesn't 
 - `index.html` explains the empathizing/systemizing framework and links out to the official survey.
 - `results.html` is the interactive tool: enter your own scores, compare them against a pre-set baseline result and demographic averages, filter by group, and explore two-way group combinations — all rendered as a grouped bar chart.
 
-The site is static HTML/CSS/JS with the demographic data baked into `data.js` at build time (i.e. when it was collected), not fetched live.
-
 ## How it works
 
 **Chart.** Every score, whether it's your entered result, the baseline "My Result", a single demographic, or a combo, is just an object with a `label`, `systemizing`, and `empathy` value. `buildChartData()` turns whatever set of these objects is currently "visible" into two Chart.js bars — one for systemizing, one for empathy — with one dataset per group. `renderChart()` decides whether to rebuild the whole chart or just call `.update()`, based on whether the label set has changed.
