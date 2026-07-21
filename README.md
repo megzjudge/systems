@@ -2,8 +2,6 @@
 
 Interactive visualization of empathizing and systemizing scores, sourced from [YourMorals.org](https://yourmorals.org/).
 
-Live site: [systems-feelings-survey.jdge.cc](https://systems-feelings-survey.jdge.cc/)
-
 ## Background
 
 The site is a companion to the **Systems & Feelings** survey hosted on YourMorals.org — a combination of the Empathizing and Systemizing scales developed by Simon Baron-Cohen at Cambridge University. Empathizing is "the drive to identify another person's emotions and thoughts, and to respond to these with an appropriate emotion"; Systemizing is "the drive to analyze the variables in a system, and to derive the underlying rules that govern the behavior of the system." Both scores range from 1.0 to 4.0.
